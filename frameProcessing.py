@@ -60,27 +60,37 @@ async def process_pose(frame):
 
 # Function to load model
 async def load_model(path):
-    with open(path, 'rb') as file:
-        return pickle.load(file)
+    with open(path, 'rb') as base64_data:
+        return pickle.load(base64_data)
 
 # Exercise 1: Lateral Raises
 @app.post("/lateral-raise-frame/")
-async def lateralRaises(file: UploadFile):
+async def lateralRaises(base64_data: str = Body(..., embed=True)):
     async def analyze_lateral_raises(frame):
         landmarks, error = await process_pose(frame)
         if error: return error
 
         # Extract points
-        parts = [mp_pose.PoseLandmarks.LEFT_SHOULDER, mp_pose.PoseLandmarks.LEFT_ELBOW, mp_pose.PoseLandmarks.LEFT_WRIST, mp_pose.PoseLandmarks.LEFT_HIP,
-                 mp_pose.PoseLandmarks.RIGHT_SHOULDER, mp_pose.PoseLandmarks.RIGHT_ELBOW, mp_pose.PoseLandmarks.RIGHT_WRIST, mp_pose.PoseLandmarks.RIGHT_HIP]
-        points = await get_coordinates(landmarks, parts)
+        parts = [mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST, mp_pose.PoseLandmark.LEFT_HIP,
+                 mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST, mp_pose.PoseLandmark.RIGHT_HIP]
+        points = []
+        for part in parts:
+            try:
+                point = await get_coordinates(landmarks, part)
+                if point is None:
+                    return JSONResponse(content={"error": f"Missing landmark {part}"}, status_code=400)
+                points.append(np.array(point))
+            except Exception as e:
+                return JSONResponse(content={"error": f"Landmark error: {str(e)}"}, status_code=500)
         left_shoulder, left_elbow, left_wrist, left_hip = points[:4]
         right_shoulder, right_elbow, right_wrist, right_hip = points[4:]
 
         # Angles and flags
         left_angle = await calculate_angle_3d(left_shoulder, left_elbow, left_wrist)
         right_angle = await calculate_angle_3d(right_shoulder, right_elbow, right_wrist)
-        curved_arms = int(left_angle < 160 or right_angle < 160)
+        curved_arms= 0
+        if(left_angle < 100 or right_angle < 100):
+            curved_arms=1
 
         # Detect initial position
         initial_position = 1 if(await calculate_angle_3d(left_elbow, left_shoulder, left_hip)<30 and await calculate_angle_3d(right_elbow, right_shoulder, right_hip)<30) else 0
@@ -94,61 +104,64 @@ async def lateralRaises(file: UploadFile):
             "initial_position": initial_position
         }, status_code=200)
 
-    return await process_frame(file, analyze_lateral_raises)
+    return await process_frame(base64_data, analyze_lateral_raises)
 
 # Exercise 2: Seated Shoulder Press
-@app.post("/seated-shoulder-press-frame/")
-async def seatedShoulderPress(file: UploadFile):
+@app.post("/shoulder-press-frame/")
+async def ShoulderPress(base64_data: str = Body(..., embed=True)):
     async def analyze_shoulder_press(frame):
         landmarks, error = await process_pose(frame)
         if error: return error
 
         # Extract points
-        parts = [mp_pose.PoseLandmarks.LEFT_SHOULDER, mp_pose.PoseLandmarks.LEFT_ELBOW, mp_pose.PoseLandmarks.LEFT_WRIST,
-                 mp_pose.PoseLandmarks.RIGHT_SHOULDER, mp_pose.PoseLandmarks.RIGHT_ELBOW, mp_pose.PoseLandmarks.RIGHT_WRIST]
-        points = await get_coordinates(landmarks, parts)
+        parts = [mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST,
+                 mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST]
+        points = []
+        for part in parts:
+            try:
+                point = await get_coordinates(landmarks, part)
+                if point is None:
+                    return JSONResponse(content={"error": f"Missing landmark {part}"}, status_code=400)
+                points.append(np.array(point))
+            except Exception as e:
+                return JSONResponse(content={"error": f"Landmark error: {str(e)}"}, status_code=500)
         left_shoulder, left_elbow, left_wrist = points[:3]
         right_shoulder, right_elbow, right_wrist = points[3:]
 
-        # Angles and flags
-        left_flare = await calculate_angle_3d(right_shoulder, left_shoulder, left_elbow)
-        right_flare = await calculate_angle_3d(left_shoulder, right_shoulder, right_elbow)
-        elbow_flare = int(left_flare > 140 or right_flare > 140)
 
         # Detect initial position
         initial_position = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)<90 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)<90) else 0
 
         # Detect breakpoint
-        breakpoint = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)>170 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)>170) else 0
+        breakpoint = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)>160 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)>160) else 0
 
         return JSONResponse(content={
-            "elbow_flare": elbow_flare,
             "breakpoint": breakpoint,
             "initial_position": initial_position
         }, status_code=200)
 
-    return await process_frame(file, analyze_shoulder_press)
+    return await process_frame(base64_data, analyze_shoulder_press)
 # Exercise 3: Cable Lateral Raises
 @app.post("/cable-lateral-raises-frame/")
-async def cableLateralRaises(file: UploadFile):
+async def cableLateralRaises(base64_data: str = Body(..., embed=True)):
     async def analyze_cable_lateral_raises(frame):
         landmarks, error = await process_pose(frame)
         if error: return error
 
         # Extract points
-        left_shoulder, left_elbow, left_wrist, left_hip = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmarks.LEFT_SHOULDER, mp_pose.PoseLandmarks.LEFT_ELBOW, mp_pose.PoseLandmarks.LEFT_WRIST, mp_pose.PoseLandmarks.LEFT_HIP]]
-        right_shoulder, right_elbow, right_wrist, right_hip = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmarks.RIGHT_SHOULDER, mp_pose.PoseLandmarks.RIGHT_ELBOW, mp_pose.PoseLandmarks.RIGHT_WRIST, mp_pose.PoseLandmarks.RIGHT_HIP]]
+        left_shoulder, left_elbow, left_wrist, left_hip = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST, mp_pose.PoseLandmark.LEFT_HIP]]
+        right_shoulder, right_elbow, right_wrist, right_hip = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST, mp_pose.PoseLandmark.RIGHT_HIP]]
 
         # Angles and flags
         left_angle = await calculate_angle_3d(left_shoulder, left_elbow, left_wrist)
         right_angle = await calculate_angle_3d(right_shoulder, right_elbow, right_wrist)
-        bent_arms = int(left_angle < 160 or right_angle < 160)
+        bent_arms = int(left_angle < 100 or right_angle < 100)
 
         # Detect initial position
         initial_position = 1 if(await calculate_angle_3d(left_elbow, left_shoulder, left_hip)<30 and await calculate_angle_3d(right_elbow, right_shoulder, right_hip)<30) else 0
         
         # Detect breakpoint
-        breakpoint = 1 if(await calculate_angle_3d(left_elbow, left_shoulder, left_hip)>75 and await calculate_angle_3d(right_elbow, right_shoulder, right_hip)>75) else 0
+        breakpoint = 1 if(await calculate_angle_3d(left_elbow, left_shoulder, left_hip)>75 or await calculate_angle_3d(right_elbow, right_shoulder, right_hip)>75) else 0
 
         return JSONResponse(content={
             "bent_arms": bent_arms,
@@ -156,49 +169,51 @@ async def cableLateralRaises(file: UploadFile):
             "initial_position": initial_position
         }, status_code=200)
 
-    return await process_frame(file, analyze_cable_lateral_raises)
+    return await process_frame(base64_data, analyze_cable_lateral_raises)
 
 # Exercise 4: Bench Press
 @app.post("/bench-press-frame/")
-async def benchPress(file: UploadFile):
+async def benchPress(base64_data: str = Body(..., embed=True)):
     async def analyze_bench_press(frame):
         landmarks, error = await process_pose(frame)
         if error: return error
 
         # Extract points
-        left_shoulder, left_elbow, left_wrist, left_hip = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmarks.LEFT_SHOULDER, mp_pose.PoseLandmarks.LEFT_ELBOW, mp_pose.PoseLandmarks.LEFT_WRIST, mp_pose.PoseLandmarks.LEFT_HIP]]
-        right_shoulder, right_elbow, right_wrist, right_hip = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmarks.RIGHT_SHOULDER, mp_pose.PoseLandmarks.RIGHT_ELBOW, mp_pose.PoseLandmarks.RIGHT_WRIST, mp_pose.PoseLandmarks.RIGHT_HIP]]
-
-        # Angles and flags
-        left_angle = await calculate_angle_3d(left_shoulder, left_elbow, left_hip)
-        right_angle = await calculate_angle_3d(right_shoulder, right_elbow, right_hip)
-        flared_elbows = int(left_angle > 75 or right_angle > 75)
+        left_shoulder, left_elbow, left_wrist = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST]]
+        right_shoulder, right_elbow, right_wrist = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST]]
 
         # Detect initial position
         initial_position = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)<90 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)<90) else 0
 
         # Detect breakpoint
-        breakpoint = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)>170 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)>170) else 0
+        breakpoint = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)>160 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)>160) else 0
 
         return JSONResponse(content={
-            "flared_elbows": flared_elbows,
             "breakpoint": breakpoint,
             "initial_position": initial_position
         }, status_code=200)
 
-    return await process_frame(file, analyze_bench_press)
+    return await process_frame(base64_data, analyze_bench_press)
 
 # Exercise 5: Inclined Dumbbell Press
 @app.post("/inclined-dumbbell-press-frame/")
-async def inclinedDumbbellPress(file: UploadFile):
+async def inclinedDumbbellPress(base64_data: str = Body(..., embed=True)):
     async def analyze_inclined_press(frame):
         landmarks, error = await process_pose(frame)
         if error: return error
 
         # Extract points
-        parts = [mp_pose.PoseLandmarks.LEFT_SHOULDER, mp_pose.PoseLandmarks.LEFT_ELBOW, mp_pose.PoseLandmarks.LEFT_WRIST, mp_pose.PoseLandmarks.LEFT_HIP,
-                 mp_pose.PoseLandmarks.RIGHT_SHOULDER, mp_pose.PoseLandmarks.RIGHT_ELBOW, mp_pose.PoseLandmarks.RIGHT_WRIST, mp_pose.PoseLandmarks.RIGHT_HIP]
-        points = await get_coordinates(landmarks, parts)
+        parts = [mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST, mp_pose.PoseLandmark.LEFT_HIP,
+                 mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST, mp_pose.PoseLandmark.RIGHT_HIP]
+        points = []
+        for part in parts:
+            try:
+                point = await get_coordinates(landmarks, part)
+                if point is None:
+                    return JSONResponse(content={"error": f"Missing landmark {part}"}, status_code=400)
+                points.append(np.array(point))
+            except Exception as e:
+                return JSONResponse(content={"error": f"Landmark error: {str(e)}"}, status_code=500)
         left_shoulder, left_elbow, left_wrist, left_hip = points[:4]
         right_shoulder, right_elbow, right_wrist, right_hip = points[4:]
 
@@ -219,7 +234,7 @@ async def inclinedDumbbellPress(file: UploadFile):
             "initial_position": initial_position
         }, status_code=200)
 
-    return await process_frame(file, analyze_inclined_press)
+    return await process_frame(base64_data, analyze_inclined_press)
 
 # Exercise 6: Cable Crossover
 @app.post("/cable-crossover-frame/")
@@ -292,7 +307,7 @@ async def ropeOverheadExtensions(base64_data: str = Body(..., embed=True)):
         flared_elbows = int(left_shoulder_angle > 90 or right_shoulder_angle > 90)
 
         # Detect initial position
-        initial_position = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)<40 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)<40) else 0
+        initial_position = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)<80 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)<80) else 0
 
         # Detect breakpoint
         breakpoint = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)>170 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)>170) else 0
@@ -330,8 +345,8 @@ async def plank(base64_data: str = Body(..., embed=True)):
                 return JSONResponse(content={"error": f"Landmark error: {str(e)}"}, status_code=500)
 
         # Load trained model
-        with open('models/Planks/plank.pkl', 'rb') as file:
-            plank_model = pickle.load(file)
+        with open('models/Planks/plank.pkl', 'rb') as base64_data:
+            plank_model = pickle.load(base64_data)
         print(plank_model.summary())
 
         # Prepare features
@@ -384,8 +399,8 @@ async def bicepCurls(base64_data: str = Body(..., embed=True)):
 
         # Load model with error handling
         try:
-            with open('models/bicep_curls/dnn_model.pkl', 'rb') as file:
-                bicep_model = pickle.load(file)
+            with open('models/bicep_curls/dnn_model.pkl', 'rb') as base64_data:
+                bicep_model = pickle.load(base64_data)
         except Exception as e:
             return JSONResponse(content={"error": f"Model loading failed: {str(e)}"}, status_code=500)
 
@@ -457,8 +472,8 @@ async def lunges(base64_data: str = Body(..., embed=True)):
 
         # Load model
         try:
-            with open('models/Lunges/lunges_model_logistic_regression.pkl', 'rb') as file:
-                lunges_model = pickle.load(file)
+            with open('models/Lunges/lunges_model_logistic_regression.pkl', 'rb') as base64_data:
+                lunges_model = pickle.load(base64_data)
         except Exception as e:
             return JSONResponse(content={"error": f"Model loading failed: {str(e)}"}, status_code=500)
 
