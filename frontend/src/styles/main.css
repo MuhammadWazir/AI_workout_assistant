@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #007AFF;
+  --secondary-color: #5856D6;
+  --background-color: #F2F2F7;
+  --text-color: #000000;
+  --gray-color: #8E8E93;
+  --light-gray-color: #C7C7CC;
+  --white-color: #FFFFFF;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 414px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.card {
+  background-color: var(--white-color);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.streak-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.streak-day {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--light-gray-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+}
+
+.streak-day.active {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+}
+
+.exercise-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.exercise-name {
+  font-weight: 500;
+}
+
+.exercise-reps {
+  color: var(--gray-color);
+}
+
+.button {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  border: none;
+  border-radius: 10px;
+  padding: 15px 20px;
+  font-size: 17px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.input {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid var(--light-gray-color);
+  border-radius: 10px;
+  font-size: 17px;
+  margin-bottom: 15px;
+}
+
+.link {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.social-button {
+  background-color: var(--white-color);
+  border: 1px solid var(--light-gray-color);
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 17px;
+  font-weight: 600;
+  width: 48%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.social-button:hover {
+  background-color: #f8f9fa;
+}
+
+.video-container {
+  width: 100%;
+  height: 300px;
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.reps-counter {
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.stop-button {
+  background-color: #FF3B30;
+}
+
+.stop-button:hover {
+  background-color: #d63026;
+}
+

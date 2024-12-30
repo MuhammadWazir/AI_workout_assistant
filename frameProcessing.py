@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, Body
+from fastapi import FastAPI, Body
 from fastapi.responses import JSONResponse
 import cv2
 import mediapipe as mp
@@ -64,7 +64,7 @@ async def load_model(path):
         return pickle.load(base64_data)
 
 # Exercise 1: Lateral Raises
-@app.post("/lateral-raise-frame/")
+@app.post("/lateral-raises-frame/")
 async def lateralRaises(base64_data: str = Body(..., embed=True)):
     async def analyze_lateral_raises(frame):
         landmarks, error = await process_pose(frame)
