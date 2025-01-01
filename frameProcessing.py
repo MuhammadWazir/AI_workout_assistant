@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Body
 from fastapi.responses import JSONResponse
 import cv2
+import math
 import mediapipe as mp
 import numpy as np
 import pickle
@@ -28,6 +29,14 @@ async def calculate_angle_3d(a, b, c):
 
     # Convert to degrees
     return np.degrees(angle)
+
+# Function to calculate distance between 2 landmarks
+async def calculate_distance(point1, point2): 
+    x1, y1, z1 = point1 
+    x2, y2, z2 = point2 
+    distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2) 
+    return distance
+
 # Function to get coordinates
 async def get_coordinates(landmarks, part):
     return [landmarks[part.value].x, landmarks[part.value].y, landmarks[part.value].z]
@@ -71,8 +80,8 @@ async def lateralRaises(base64_data: str = Body(..., embed=True)):
         if error: return error
 
         # Extract points
-        parts = [mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST, mp_pose.PoseLandmark.LEFT_HIP,
-                 mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST, mp_pose.PoseLandmark.RIGHT_HIP]
+        parts = [mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST, mp_pose.PoseLandmark.LEFT_HIP,mp_pose.PoseLandmark.LEFT_KNEE,
+                 mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST, mp_pose.PoseLandmark.RIGHT_HIP, mp_pose.PoseLandmark.RIGHT_KNEE]
         points = []
         for part in parts:
             try:
@@ -82,15 +91,19 @@ async def lateralRaises(base64_data: str = Body(..., embed=True)):
                 points.append(np.array(point))
             except Exception as e:
                 return JSONResponse(content={"error": f"Landmark error: {str(e)}"}, status_code=500)
-        left_shoulder, left_elbow, left_wrist, left_hip = points[:4]
-        right_shoulder, right_elbow, right_wrist, right_hip = points[4:]
+        left_shoulder, left_elbow, left_wrist, left_hip, left_knee  = points[:5]
+        right_shoulder, right_elbow, right_wrist, right_hip, right_knee = points[5:]
 
         # Angles and flags
-        left_angle = await calculate_angle_3d(left_shoulder, left_elbow, left_wrist)
-        right_angle = await calculate_angle_3d(right_shoulder, right_elbow, right_wrist)
+        left_arm_angle = await calculate_angle_3d(left_shoulder, left_elbow, left_wrist)
+        right_arm_angle = await calculate_angle_3d(right_shoulder, right_elbow, right_wrist)
+        hip_angle = await calculate_angle_3d(right_shoulder, right_hip, right_knee)
         curved_arms= 0
-        if(left_angle < 100 or right_angle < 100):
+        standing_upright=0
+        if(left_arm_angle < 100 or right_arm_angle < 100):
             curved_arms=1
+        if(hip_angle >160):
+            standing_upright=1
 
         # Detect initial position
         initial_position = 1 if(await calculate_angle_3d(left_elbow, left_shoulder, left_hip)<30 and await calculate_angle_3d(right_elbow, right_shoulder, right_hip)<30) else 0
@@ -100,6 +113,7 @@ async def lateralRaises(base64_data: str = Body(..., embed=True)):
 
         return JSONResponse(content={
             "curved_arms": curved_arms,
+            "standing_upright": standing_upright,
             "breakpoint": breakpoint,
             "initial_position": initial_position
         }, status_code=200)
@@ -128,6 +142,10 @@ async def ShoulderPress(base64_data: str = Body(..., embed=True)):
         left_shoulder, left_elbow, left_wrist = points[:3]
         right_shoulder, right_elbow, right_wrist = points[3:]
 
+        arms_too_wide=0
+        if(calculate_angle_3d(left_shoulder, right_shoulder, right_elbow)>150 or calculate_angle_3d(right_shoulder, left_shoulder, left_elbow)>150):
+            arms_too_wide=1
+
 
         # Detect initial position
         initial_position = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)<90 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)<90) else 0
@@ -136,6 +154,7 @@ async def ShoulderPress(base64_data: str = Body(..., embed=True)):
         breakpoint = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)>160 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)>160) else 0
 
         return JSONResponse(content={
+            "arms_too_wide": arms_too_wide,
             "breakpoint": breakpoint,
             "initial_position": initial_position
         }, status_code=200)
@@ -157,6 +176,11 @@ async def cableLateralRaises(base64_data: str = Body(..., embed=True)):
         right_angle = await calculate_angle_3d(right_shoulder, right_elbow, right_wrist)
         bent_arms = int(left_angle < 100 or right_angle < 100)
 
+        #detect leaning body
+        leaning_body= 0
+        if((left_shoulder[1]-left_hip[1])/(left_shoulder[0]-left_hip[0])<20):
+            leaning_body=1
+
         # Detect initial position
         initial_position = 1 if(await calculate_angle_3d(left_elbow, left_shoulder, left_hip)<30 and await calculate_angle_3d(right_elbow, right_shoulder, right_hip)<30) else 0
         
@@ -165,6 +189,7 @@ async def cableLateralRaises(base64_data: str = Body(..., embed=True)):
 
         return JSONResponse(content={
             "bent_arms": bent_arms,
+            "leaning_body": leaning_body,
             "breakpoint": breakpoint,
             "initial_position": initial_position
         }, status_code=200)
@@ -181,6 +206,14 @@ async def benchPress(base64_data: str = Body(..., embed=True)):
         # Extract points
         left_shoulder, left_elbow, left_wrist = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST]]
         right_shoulder, right_elbow, right_wrist = [await get_coordinates(landmarks, part) for part in [mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST]]
+        right_hip = await get_coordinates(landmarks, mp_pose.PoseLandmark.RIGHT_HIP)
+        # Calculate shoulder width 
+        shoulder_width = await calculate_distance(left_shoulder, right_shoulder)
+
+        # Calculate wrist width 
+        wrist_width = await calculate_distance(left_wrist, right_wrist)
+
+        wrists_too_narrow = 1 if wrist_width < 1.1 * shoulder_width else 0
 
         # Detect initial position
         initial_position = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)<90 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)<90) else 0
@@ -189,6 +222,7 @@ async def benchPress(base64_data: str = Body(..., embed=True)):
         breakpoint = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)>160 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)>160) else 0
 
         return JSONResponse(content={
+            "wrists_too_narrow": wrists_too_narrow,
             "breakpoint": breakpoint,
             "initial_position": initial_position
         }, status_code=200)
@@ -218,9 +252,9 @@ async def inclinedDumbbellPress(base64_data: str = Body(..., embed=True)):
         right_shoulder, right_elbow, right_wrist, right_hip = points[4:]
 
         # Angles and flags
-        left_angle = await calculate_angle_3d(left_shoulder, left_elbow, left_hip)
-        right_angle = await calculate_angle_3d(right_shoulder, right_elbow, right_hip)
-        flared_elbows = int(left_angle > 75 or right_angle > 75)
+        left_angle = await calculate_angle_3d(left_elbow, left_shoulder, left_hip)
+        right_angle = await calculate_angle_3d(right_elbow, right_shoulder, right_hip)
+        flared_elbows = int(left_angle > 45 or right_angle > 45)
 
         # Detect initial position
         initial_position = 1 if(await calculate_angle_3d(left_wrist, left_elbow, left_shoulder)<90 and await calculate_angle_3d(right_wrist, right_elbow, right_shoulder)<90) else 0
@@ -258,11 +292,6 @@ async def cableCrossover(base64_data: str = Body(..., embed=True)):
         left_shoulder, left_elbow, left_wrist, left_hip = points[:4]
         right_shoulder, right_elbow, right_wrist, right_hip = points[4:]
 
-        # Angles and flags
-        elbow_angle_left = await calculate_angle_3d(left_shoulder, left_elbow, left_wrist)
-        elbow_angle_right = await calculate_angle_3d(right_shoulder, right_elbow, right_wrist)
-        flared_elbows = int(elbow_angle_left > 150 or elbow_angle_right > 150)
-
         # Detect initial position
         initial_position = 0
 
@@ -271,8 +300,15 @@ async def cableCrossover(base64_data: str = Body(..., embed=True)):
         breakpoint =0
         if(await calculate_angle_3d(left_elbow, left_shoulder, left_hip)<60 and await calculate_angle_3d(right_elbow, right_shoulder, right_hip)<60):
             breakpoint=1
+        bent_arms_at_breakpoint=0
+
+        #detect bent arms at breakpoint
+        if(breakpoint==1 and (calculate_angle_3d(left_wrist, left_elbow, left_shoulder)<160 or
+                               calculate_angle_3d(right_wrist, right_elbow, right_shoulder)<160)):
+            bent_arms_at_breakpoint=1
+        
         return JSONResponse(content={
-            "flared_elbows": flared_elbows,
+            "bent_arms_at_breakpoint": bent_arms_at_breakpoint,
             "breakpoint": breakpoint,
             "initial_position": initial_position
         }, status_code=200)
