@@ -1,11 +1,12 @@
 import React from "react";
 import { Profile } from "../../assets/Profile.jsx";
 import { Key} from "../../assets/Key.jsx";
+import {Mail} from "../../assets/Mail.jsx"
 import Google from "../../assets/Google.jsx"
 import Facebook from "../../assets/Facebook.jsx";
-import "./login_style.css";
+import "./register_style.css";
 
-const Login = () => {
+const Register = () => {
   return (
     <main className="login">
       <section className="frame">
@@ -30,6 +31,15 @@ const Login = () => {
       type="text"
       className="text-input"
       placeholder="Username"
+    />
+  </div>
+  <div className="input-wrapper">
+    <Mail className="design-component-instance-node input-icon" />
+    <input
+      id="email"
+      type="text"
+      className="text-input"
+      placeholder="Email"
     />
   </div>
 
@@ -71,4 +81,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
