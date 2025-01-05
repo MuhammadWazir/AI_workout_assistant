@@ -1,17 +1,21 @@
 import React from "react";
-import ellipse4 from "./ellipse-4.svg";
-import rectangle5742 from "./rectangle-5742.png";
-import "./style.css";
+import "./home_style.css";
+import ExerciseCard from "../ExerciseCard/ExerciseCard";
 
-export const Home = () => {
+const Home = () => {
+  const exercises = [
+    { name: "Plank", imageSrc: "./plank.png", altText: "Plank" },
+    { name: "Bicep Curls", imageSrc: "./bicep_curls.png", altText: "Bicep Curls" },
+    { name: "Lunges", imageSrc: "./lunges.png", altText: "Lunges" },
+    { name: "Bench Press", imageSrc: "./bench_press.png", altText: "Bench Press" },
+  ];
   return (
     <main className="home">
       <header className="header">
         <div className="profile">
-          <img className="profile-image" alt="Profile" src={ellipse4} />
           <div className="profile-text">
             <h1 className="greeting">Hi Deep</h1>
-            <p className="sub-greeting">Let's get started</p>
+
           </div>
         </div>
         <div className="menu-dots">
@@ -21,16 +25,12 @@ export const Home = () => {
         </div>
       </header>
 
-      <section className="streaks-section">
-        <div className="streaks">
-          <button className="streaks-button">Streaks</button>
-          <button className="streaks-button">Monday</button>
-        </div>
-        <div className="streaks-image">
+      <section className="home-image-section">
+        <div className="home-image">
           <img
-            className="streaks-background"
+            className="home-image-background"
             alt="Workout"
-            src="./unsplash-7kepupb8vnk.png"
+            src="./home_image.png"
           />
         </div>
       </section>
@@ -38,67 +38,22 @@ export const Home = () => {
       <section className="exercises-section">
         <header className="exercises-header">
           <h2 className="exercises-title">Exercises</h2>
-          <span className="sets-count">3 Sets</span>
         </header>
 
         <div className="exercise-list">
-          <article className="exercise-card">
-            <div className="exercise-info">
-              <h3 className="exercise-name">Warm Up</h3>
-              <p className="exercise-reps">05:00</p>
-            </div>
-            <div className="exercise-icon">
-              <img
-                className="exercise-thumbnail"
-                alt="Warm Up"
-                src={rectangle5742}
-              />
-            </div>
-          </article>
-
-          <article className="exercise-card">
-            <div className="exercise-info">
-              <h3 className="exercise-name">Jumping Jack</h3>
-              <p className="exercise-reps">12x</p>
-            </div>
-            <div className="exercise-icon">
-              <img
-                className="exercise-thumbnail"
-                alt="Jumping Jack"
-                src="./rectangle-5736-6.png"
-              />
-            </div>
-          </article>
-
-          <article className="exercise-card">
-            <div className="exercise-info">
-              <h3 className="exercise-name">Skipping</h3>
-              <p className="exercise-reps">15x</p>
-            </div>
-            <div className="exercise-icon">
-              <img
-                className="exercise-thumbnail"
-                alt="Skipping"
-                src="./rectangle-5736-4.png"
-              />
-            </div>
-          </article>
-
-          <article className="exercise-card">
-            <div className="exercise-info">
-              <h3 className="exercise-name">Squats</h3>
-              <p className="exercise-reps">20x</p>
-            </div>
-            <div className="exercise-icon">
-              <img
-                className="exercise-thumbnail"
-                alt="Squats"
-                src="./rectangle-5742-2.png"
-              />
-            </div>
-          </article>
+          {/* Loop through the exercises array and render ExerciseCard for each item */}
+          {exercises.map((exercise, index) => (
+            <ExerciseCard
+              key={index}  // Use the index as a key, though using a unique id is better
+              name={exercise.name}
+              imageSrc={exercise.imageSrc}
+              altText={exercise.altText}
+            />
+          ))}
         </div>
       </section>
     </main>
   );
 };
+
+export default Home;

@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './Login/Login';
 import Register from './Register/Register';
-import Dashboard from './Dashboard';
+import Home from "./Home/Home"
 import Exercise from './Exercise';
 import Report from './Report';
 import '../styles/main.css';
@@ -12,7 +12,7 @@ function App() {
     <Router>
       <div className="App container">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/exercise/:name" element={<Exercise />} />
