@@ -8,6 +8,7 @@
   --gray-color: #8E8E93;
   --light-gray-color: #C7C7CC;
   --white-color: #FFFFFF;
+  --danger-color: #FF3B30;
 }
 
 body {
@@ -24,66 +25,25 @@ body {
   padding: 20px;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
 .title {
   font-size: 34px;
   font-weight: 700;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
 .subtitle {
   font-size: 22px;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .card {
-  background-color: var(--white-color);
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.streak-container {
-  display: flex;
-  justify-content: space-between;
-}
-
-.streak-day {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: var(--light-gray-color);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 600;
-}
-
-.streak-day.active {
-  background-color: var(--primary-color);
-  color: var(--white-color);
-}
-
-.exercise-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.exercise-name {
-  font-weight: 500;
-}
-
-.exercise-reps {
-  color: var(--gray-color);
+  text-align: center;
 }
 
 .button {
@@ -103,40 +63,12 @@ body {
   background-color: #0056b3;
 }
 
-.input {
-  width: 100%;
-  padding: 15px;
-  border: 1px solid var(--light-gray-color);
-  border-radius: 10px;
-  font-size: 17px;
-  margin-bottom: 15px;
+.stop-button {
+  background-color: var(--danger-color);
 }
 
-.link {
-  color: var(--primary-color);
-  text-decoration: none;
-}
-
-.social-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-.social-button {
-  background-color: var(--white-color);
-  border: 1px solid var(--light-gray-color);
-  border-radius: 10px;
-  padding: 10px 20px;
-  font-size: 17px;
-  font-weight: 600;
-  width: 48%;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.social-button:hover {
-  background-color: #f8f9fa;
+.stop-button:hover {
+  background-color: #d63026;
 }
 
 .video-container {
@@ -147,6 +79,7 @@ body {
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
+  position: relative;
 }
 
 .reps-counter {
@@ -156,11 +89,9 @@ body {
   margin-bottom: 20px;
 }
 
-.stop-button {
-  background-color: #FF3B30;
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
 }
-
-.stop-button:hover {
-  background-color: #d63026;
-}
-

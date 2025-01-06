@@ -1,10 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useRef, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 function Exercise() {
-  const { name } = useParams();
+  const { name: slug } = useParams(); // Slug from the URL
+  const location = useLocation();
   const navigate = useNavigate();
+
+  // Use the passed state or fallback to formatting the slug
+  const displayName = location.state?.displayName || slug.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
   const [isStarted, setIsStarted] = useState(false);
   const [reps, setReps] = useState(0);
   const videoRef = useRef(null);
@@ -33,17 +38,17 @@ function Exercise() {
   const handleStop = () => {
     setIsStarted(false);
     if (videoRef.current && videoRef.current.srcObject instanceof MediaStream) {
-      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
     }
-    navigate(`/report/${name}`, { state: { results } });
+    navigate(`/report/${slug}`, { state: { results } });
   };
 
   const captureFrame = () => {
     if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext('2d');
+      const context = canvasRef.current.getContext("2d");
       if (context) {
         context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-        const imageData = canvasRef.current.toDataURL('image/jpeg');
+        const imageData = canvasRef.current.toDataURL("image/jpeg");
         sendFrameToAPI(imageData);
       }
     }
@@ -51,10 +56,10 @@ function Exercise() {
 
   const sendFrameToAPI = async (imageData) => {
     try {
-      const response = await axios.post(`http://localhost:8000/${name.toLowerCase()}-frame/`, { base64_data: imageData });
-      setResults(prevResults => [...prevResults, response.data]);
+      const response = await axios.post(`http://localhost:8000/${slug}-frame/`, { base64_data: imageData });
+      setResults((prevResults) => [...prevResults, response.data]);
       // Update reps based on the response
-      setReps(prevReps => prevReps + 1);
+      setReps((prevReps) => prevReps + 1);
     } catch (error) {
       console.error("Error sending frame to API", error);
     }
@@ -62,12 +67,14 @@ function Exercise() {
 
   return (
     <div className="container">
-      <h1 className="title">{name}</h1>
-      
+      <h1 className="title">{displayName}</h1>
+
       {!isStarted ? (
         <div>
           <h2 className="subtitle">Instructions</h2>
-          <p className="card">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+          <p className="card">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
           <button onClick={handleStart} className="button">
             Start
           </button>
@@ -77,7 +84,7 @@ function Exercise() {
           <div className="video-container">
             <video ref={videoRef} autoPlay playsInline muted className="h-full" />
           </div>
-          <canvas ref={canvasRef} style={{ display: 'none' }} width="640" height="480" />
+          <canvas ref={canvasRef} style={{ display: "none" }} width="640" height="480" />
           <p className="reps-counter">REPS: {reps}</p>
           <button onClick={handleStop} className="button stop-button">
             Stop
@@ -89,4 +96,3 @@ function Exercise() {
 }
 
 export default Exercise;
-

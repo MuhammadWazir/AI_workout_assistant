@@ -4,10 +4,10 @@ import ExerciseCard from "../ExerciseCard/ExerciseCard";
 
 const Home = () => {
   const exercises = [
-    { name: "Plank", imageSrc: "./plank.png", altText: "Plank" },
-    { name: "Bicep Curls", imageSrc: "./bicep_curls.png", altText: "Bicep Curls" },
-    { name: "Lunges", imageSrc: "./lunges.png", altText: "Lunges" },
-    { name: "Bench Press", imageSrc: "./bench_press.png", altText: "Bench Press" },
+    { name: "Plank", imageSrc: "./plank.png", altText: "Plank" , slug:"plank"},
+    { name: "Bicep Curls", imageSrc: "./bicep_curls.png", altText: "Bicep Curls", slug:"bicep_curls" },
+    { name: "Lunges", imageSrc: "./lunges.png", altText: "Lunges", slug:"lunges" },
+    { name: "Bench Press", imageSrc: "./bench_press.png", altText: "Bench Press", slug:"bench_press" },
   ];
   return (
     <main className="home">
@@ -44,10 +44,11 @@ const Home = () => {
           {/* Loop through the exercises array and render ExerciseCard for each item */}
           {exercises.map((exercise, index) => (
             <ExerciseCard
-              key={index}  // Use the index as a key, though using a unique id is better
+              key={index}
               name={exercise.name}
               imageSrc={exercise.imageSrc}
               altText={exercise.altText}
+              slug={exercise.slug} 
             />
           ))}
         </div>
