@@ -1,0 +1,323 @@
+/* Reset CSS */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Ensures padding and borders are included in the element's dimensions */
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Prevent any unwanted scrolling */
+}
+
+/* Fix for the .login alignment */
+.login {
+  background-color: #0e0e0e;
+  width: 100vw; /* Full viewport width */
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: fixed; /* Ensure it's firmly attached to the viewport */
+  top: 0; /* Align it perfectly to the top */
+  left: 0; /* Align it perfectly to the left */
+}
+
+.login .frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+}
+
+.login .div-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2e8fe4;
+  border-radius: 15px;
+  margin-top: 30px;
+  padding: 20px;
+  width: 193px;
+}
+
+.login .text-wrapper {
+  color: #ffffff;
+  font-family: "Quicksand-Bold", Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.login .don-t-have-an {
+  color: #828282;
+  font-family: "Quicksand-Medium", Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.login .text-wrapper-2 {
+  color: #80c2ff;
+  margin-top: 20px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.login .overlap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 310px;
+  height: 128px;
+}
+
+.login .frame-2 {
+  display: flex;
+  flex-direction: row; /* Items side by side */
+  align-items: center; /* Vertically center items */
+  background-color: #1e1e1e;
+  border-radius: 15px;
+  gap: 10px;
+  margin: 20px;
+  padding: 15px 20px;
+  width: 300px;
+  position: relative; /* Add relative positioning to the container */
+}
+/* Label styling */
+.login .text-wrapper-4 , .login .text-wrapper-3{
+  color: #828282;
+  font-family: "Quicksand-Medium", Helvetica, sans-serif;
+  font-size: 14px;
+  margin-right: 10px;
+}
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+.login .frame-4 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.login .text-wrapper-5 {
+  color: #828282;
+  font-family: "Quicksand-Medium", Helvetica, sans-serif;
+  font-size: 13px;
+  text-align: center;
+}
+
+.login .frame-5 {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.login .google-sign-in,
+.login .facebook-sign-in{
+  width: 132px;
+  height: 60px;
+  border:none;
+  margin-bottom: 40px;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+.login .login-button{
+  border: none;
+  background: none;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.login .overlap-group,
+.login .overlap-2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  border-radius: 15px;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.1);
+  width: 130px;
+  height: 60px;
+}
+
+.login .overlap-group {
+  background-color: #ffffff;
+}
+
+.login .overlap-2 {
+  background-color: #4367c6;
+}
+
+.login .text-wrapper-6,
+.login .text-wrapper-7 {
+  font-family: "Quicksand-Medium", Helvetica, sans-serif;
+  font-size: 14px;
+  text-align: center;
+  color: inherit;
+}
+
+ .google,.facebook {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 50%;
+  left: 0px;
+  transform: translateY(-50%);
+}
+.input-wrapper {
+  display: flex;
+  flex-direction: row; /* Items side by side */
+  align-items: center; /* Vertically center items */
+  background-color: #1e1e1e;
+  border-radius: 15px;
+  gap: 10px;
+  margin: 10px;
+  padding: 15px 20px;
+  width: 300px;
+  position: relative;
+}
+
+.text-input {
+  width: 100%;
+  padding: 10px 40px; /* Space for icons */
+  font-size: 16px;
+  border: 0; /* No border */
+  border-radius: 5px;
+  background-color: #1e1e1e;
+  color: #ccc;
+  outline: none; /* Removes the focus outline */
+  caret-color: #ccc; /* Ensures the text cursor is visible */
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 20px; /* Adjust to align with the input padding */
+  transform: translateY(-50%);
+  width: 20px; /* Adjust size as needed */
+  height: 20px;
+  fill: #ccc; /* Icon color */
+}
+
+/* Media Queries for responsiveness */
+@media (max-width: 768px) {
+  .login .frame {
+    gap: 15px; /* Increased gap between items */
+  }
+
+  .login .div-wrapper {
+    width: 220px; /* Increased width */
+    padding: 25px;
+  }
+
+  .login .text-wrapper {
+    font-size: 22px; /* Bigger font size for text */
+  }
+
+  .login .don-t-have-an {
+    font-size: 16px; /* Increased font size for small text */
+  }
+
+  .login .text-wrapper-2 {
+    font-size: 18px; /* Increased font size for links */
+  }
+
+  .login .overlap {
+    width: 350px; /* Increased width */
+    height: 150px; /* Increased height */
+  }
+
+  .login .frame-2 {
+    width: 350px; /* Increased width */
+    padding: 18px 25px; /* Increased padding */
+  }
+
+  .login .text-wrapper-3,
+  .login .text-wrapper-4 {
+    font-size: 16px; /* Increased font size for form labels */
+  }
+
+  .login .google-sign-in,
+  .login .facebook-sign-in {
+    width: 150px; /* Bigger buttons */
+    height: 70px;
+  }
+
+  .login .google,.facebook {
+    width: 30px; /* Larger icon size */
+    height: 30px;
+  }
+
+  .login .cbi-roomsgym {
+    width: 80px; /* Increased size for logo */
+    height: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login .frame {
+    gap: 20px; /* Even larger gap */
+  }
+
+  .login .div-wrapper {
+    width: 240px; /* Increased width */
+    padding: 30px;
+  }
+
+  .login .text-wrapper {
+    font-size: 26px; /* Larger font size for text */
+  }
+
+  .login .don-t-have-an {
+    font-size: 18px; /* Bigger font size for small text */
+  }
+
+  .login .text-wrapper-2 {
+    font-size: 20px; /* Larger font size for links */
+  }
+
+  .login .overlap {
+    width: 380px; /* Larger form container */
+    height: 180px; /* Increased height */
+  }
+
+  .login .frame-2 {
+    width: 380px; /* Larger input field width */
+    padding: 22px 30px; /* More padding */
+  }
+
+  .login .text-wrapper-3,
+  .login .text-wrapper-4 {
+    font-size: 18px; /* Larger font size for labels */
+  }
+
+  .login .google-sign-in,
+  .login .facebook-sign-in {
+    width: 180px; /* Larger buttons */
+    height: 80px;
+  }
+
+  .login .google,.facebook {
+    width: 35px; /* Larger icon size */
+    height: 35px;
+  }
+
+  .login .cbi-roomsgym {
+    width: 100px; /* Larger logo size */
+    height: 100px;
+  }
+}

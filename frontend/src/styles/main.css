@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #007AFF;
+  --secondary-color: #5856D6;
+  --background-color: #F2F2F7;
+  --text-color: #000000;
+  --gray-color: #8E8E93;
+  --light-gray-color: #C7C7CC;
+  --white-color: #FFFFFF;
+  --danger-color: #FF3B30;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 414px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.title {
+  font-size: 34px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.card {
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.button {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  border: none;
+  border-radius: 10px;
+  padding: 15px 20px;
+  font-size: 17px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.stop-button {
+  background-color: var(--danger-color);
+}
+
+.stop-button:hover {
+  background-color: #d63026;
+}
+
+.video-container {
+  width: 100%;
+  height: 300px;
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.reps-counter {
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
