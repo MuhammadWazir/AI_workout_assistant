@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Camera } from "@mediapipe/camera_utils";
+import { Pose, PoseLandmark } from "@mediapipe/pose";
 import axios from 'axios';
 
 function Exercise() {
@@ -15,8 +16,7 @@ function Exercise() {
   const canvasRef = useRef(null);
 
   // Set up MediaPipe Pose
-  const mp_pose = window?.google?.mediapipe?.pose;
-  const pose = new mp_pose.Pose({
+  const pose = new Pose({
     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`,
   });
 
@@ -37,7 +37,14 @@ function Exercise() {
 
   // Function to get coordinates of a landmark
   const getCoordinates = (landmarks, part) => {
-    return { x: landmarks[part].x, y: landmarks[part].y, z: landmarks[part].z };
+    if (!landmarks || landmarks.length <= part || !landmarks[part]) {
+      return { x: 0, y: 0, z: 0 };
+    }
+    return { 
+      x: landmarks[part].x, 
+      y: landmarks[part].y, 
+      z: landmarks[part].z 
+    };
   };
 
   const analyzeLateralRaises = (landmarks) => {
@@ -212,103 +219,125 @@ function Exercise() {
 
   const analyzePlank = async (landmarks) => {
     const parts = [
-      mp_pose.PoseLandmark.NOSE, mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.RIGHT_SHOULDER,
-      mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST,
-      mp_pose.PoseLandmark.RIGHT_WRIST, mp_pose.PoseLandmark.LEFT_HIP, mp_pose.PoseLandmark.RIGHT_HIP,
-      mp_pose.PoseLandmark.LEFT_KNEE, mp_pose.PoseLandmark.RIGHT_KNEE, mp_pose.PoseLandmark.LEFT_ANKLE,
-      mp_pose.PoseLandmark.RIGHT_ANKLE, mp_pose.PoseLandmark.LEFT_HEEL, mp_pose.PoseLandmark.RIGHT_HEEL,
-      mp_pose.PoseLandmark.LEFT_FOOT_INDEX, mp_pose.PoseLandmark.RIGHT_FOOT_INDEX
+      PoseLandmark.NOSE,
+      PoseLandmark.LEFT_SHOULDER,
+      PoseLandmark.RIGHT_SHOULDER,
+      PoseLandmark.LEFT_ELBOW,
+      PoseLandmark.RIGHT_ELBOW,
+      PoseLandmark.LEFT_WRIST,
+      PoseLandmark.RIGHT_WRIST,
+      PoseLandmark.LEFT_HIP,
+      PoseLandmark.RIGHT_HIP,
+      PoseLandmark.LEFT_KNEE,
+      PoseLandmark.RIGHT_KNEE,
+      PoseLandmark.LEFT_ANKLE,
+      PoseLandmark.RIGHT_ANKLE,
+      PoseLandmark.LEFT_HEEL,
+      PoseLandmark.RIGHT_HEEL,
+      PoseLandmark.LEFT_FOOT_INDEX,
+      PoseLandmark.RIGHT_FOOT_INDEX
     ];
 
     const points = parts.map(part => getCoordinates(landmarks, part));
-
     try {
-      const response = await axios.post('localhost:3000/plank', { landmarks: points });
-      const { data } = response;
-      setFrameResults(prevResults => [...prevResults, data]);
+      const response = await axios.post('http://localhost:3000/plank', { landmarks: points });
+      setFrameResults(prev => [...prev, response.data]);
     } catch (error) {
       console.error('Error sending data to backend', error);
     }
   };
 
   const calculatePositionFlagsBicepCurls = (landmarks) => {
-    const leftShoulder = getCoordinates(landmarks, mp_pose.PoseLandmark.LEFT_SHOULDER);
-    const leftElbow = getCoordinates(landmarks, mp_pose.PoseLandmark.LEFT_ELBOW);
-    const leftWrist = getCoordinates(landmarks, mp_pose.PoseLandmark.LEFT_WRIST);
-    const rightShoulder = getCoordinates(landmarks, mp_pose.PoseLandmark.RIGHT_SHOULDER);
-    const rightElbow = getCoordinates(landmarks, mp_pose.PoseLandmark.RIGHT_ELBOW);
-    const rightWrist = getCoordinates(landmarks, mp_pose.PoseLandmark.RIGHT_WRIST);
-    const initialPosition = (calculateAngle(leftWrist, leftElbow, leftShoulder) < 80 && calculateAngle(rightWrist, rightElbow, rightShoulder) < 80) ? 1 : 0;
-    const breakpoint = (calculateAngle(leftWrist, leftElbow, leftShoulder) > 170 && calculateAngle(rightWrist, rightElbow, rightShoulder) > 170) ? 1 : 0;
+    const leftShoulder = getCoordinates(landmarks, PoseLandmark.LEFT_SHOULDER);
+    const leftElbow = getCoordinates(landmarks, PoseLandmark.LEFT_ELBOW);
+    const leftWrist = getCoordinates(landmarks, PoseLandmark.LEFT_WRIST);
+    const rightShoulder = getCoordinates(landmarks, PoseLandmark.RIGHT_SHOULDER);
+    const rightElbow = getCoordinates(landmarks, PoseLandmark.RIGHT_ELBOW);
+    const rightWrist = getCoordinates(landmarks, PoseLandmark.RIGHT_WRIST);
+    
+    const initialPosition = (calculateAngle(leftWrist, leftElbow, leftShoulder) < 80 && 
+                           calculateAngle(rightWrist, rightElbow, rightShoulder) < 80) ? 1 : 0;
+    const breakpoint = (calculateAngle(leftWrist, leftElbow, leftShoulder) > 170 && 
+                      calculateAngle(rightWrist, rightElbow, rightShoulder) > 170) ? 1 : 0;
     return { initialPosition, breakpoint };
   };
-
+  
   const analyzeBicepCurls = async (landmarks) => {
     const parts = [
-      mp_pose.PoseLandmark.NOSE, mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.RIGHT_SHOULDER,
-      mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST,
-      mp_pose.PoseLandmark.RIGHT_WRIST, mp_pose.PoseLandmark.LEFT_HIP, mp_pose.PoseLandmark.RIGHT_HIP
+      PoseLandmark.NOSE, 
+      PoseLandmark.LEFT_SHOULDER,
+      PoseLandmark.RIGHT_SHOULDER,
+      PoseLandmark.LEFT_ELBOW,
+      PoseLandmark.RIGHT_ELBOW,
+      PoseLandmark.LEFT_WRIST,
+      PoseLandmark.RIGHT_WRIST,
+      PoseLandmark.LEFT_HIP,
+      PoseLandmark.RIGHT_HIP
     ];
+    
     const points = parts.map(part => getCoordinates(landmarks, part));
     const { initialPosition, breakpoint } = calculatePositionFlagsBicepCurls(landmarks);
+    
     try {
-      const response = await axios.post('localhost:3000/bicep-curls', { landmarks: points });
-      const { data } = response;
-      const combinedResult = {
-        ...data,
-        initialPosition,
-        breakpoint
-      };
-      setFrameResults(prevResults => [...prevResults, combinedResult]);
+      const response = await axios.post('http://localhost:3000/bicep-curls', { 
+        landmarks: points 
+      });
+      setFrameResults(prev => [...prev, { ...response.data, initialPosition, breakpoint }]);
     } catch (error) {
-      console.error('Error sending data to backend:', error);
+      console.error('Bicep curl analysis error:', error);
     }
   };
 
   const calculatePositionFlagsLunges = (landmarks) => {
-    const leftHip = getCoordinates(landmarks, mp_pose.PoseLandmark.LEFT_HIP);
-    const leftKnee = getCoordinates(landmarks, mp_pose.PoseLandmark.LEFT_KNEE);
-    const leftAnkle = getCoordinates(landmarks, mp_pose.PoseLandmark.LEFT_ANKLE);
-    const rightHip = getCoordinates(landmarks, mp_pose.PoseLandmark.RIGHT_HIP);
-    const rightKnee = getCoordinates(landmarks, mp_pose.PoseLandmark.RIGHT_KNEE);
-    const rightAnkle = getCoordinates(landmarks, mp_pose.PoseLandmark.RIGHT_ANKLE);
-
-    const initialPosition = (calculateAngle(leftHip, leftKnee, leftAnkle) > 170 && calculateAngle(rightHip, rightKnee, rightAnkle) > 170) ? 1 : 0;
-    const breakpoint = (calculateAngle(leftHip, leftKnee, leftAnkle) < 80 || calculateAngle(rightHip, rightKnee, rightAnkle) < 80) ? 1 : 0;
-
+    const leftHip = getCoordinates(landmarks, PoseLandmark.LEFT_HIP);
+    const leftKnee = getCoordinates(landmarks, PoseLandmark.LEFT_KNEE);
+    const leftAnkle = getCoordinates(landmarks, PoseLandmark.LEFT_ANKLE);
+    const rightHip = getCoordinates(landmarks, PoseLandmark.RIGHT_HIP);
+    const rightKnee = getCoordinates(landmarks, PoseLandmark.RIGHT_KNEE);
+    const rightAnkle = getCoordinates(landmarks, PoseLandmark.RIGHT_ANKLE);
+    if (!leftHip || !leftKnee || !leftAnkle || !rightHip || !rightKnee || !rightAnkle) {
+      return { initialPosition: 0, breakpoint: 0 };
+    }
+    const initialPosition = (calculateAngle(leftHip, leftKnee, leftAnkle) > 170 && 
+                           calculateAngle(rightHip, rightKnee, rightAnkle) > 170) ? 1 : 0;
+    const breakpoint = (calculateAngle(leftHip, leftKnee, leftAnkle) < 80 || 
+                      calculateAngle(rightHip, rightKnee, rightAnkle) < 80) ? 1 : 0;
+  
     return { initialPosition, breakpoint };
   };
-
+  
   const analyzeLunges = async (landmarks) => {
     const parts = [
-      mp_pose.PoseLandmark.LEFT_HIP, mp_pose.PoseLandmark.RIGHT_HIP,
-      mp_pose.PoseLandmark.LEFT_KNEE, mp_pose.PoseLandmark.RIGHT_KNEE,
-      mp_pose.PoseLandmark.LEFT_ANKLE, mp_pose.PoseLandmark.RIGHT_ANKLE,
-      mp_pose.PoseLandmark.LEFT_HEEL, mp_pose.PoseLandmark.RIGHT_HEEL,
-      mp_pose.PoseLandmark.LEFT_FOOT_INDEX, mp_pose.PoseLandmark.RIGHT_FOOT_INDEX
+      PoseLandmark.LEFT_HIP, PoseLandmark.RIGHT_HIP,
+      PoseLandmark.LEFT_KNEE, PoseLandmark.RIGHT_KNEE,
+      PoseLandmark.LEFT_ANKLE, PoseLandmark.RIGHT_ANKLE,
+      PoseLandmark.LEFT_HEEL, PoseLandmark.RIGHT_HEEL,
+      PoseLandmark.LEFT_FOOT_INDEX, PoseLandmark.RIGHT_FOOT_INDEX
     ];
-
+  
     const points = parts.map(part => getCoordinates(landmarks, part));
     const { initialPosition, breakpoint } = calculatePositionFlagsLunges(landmarks);
+    
     try {
-      const response = await axios.post('localhost:3000/lunges', { landmarks: points });
-      const { data } = response;
-      const combinedResult = {
-        ...data,
+      const response = await axios.post('http://localhost:3000/lunges', { 
+        landmarks: points 
+      });
+      
+      setFrameResults(prev => [...prev, {
+        ...response.data,
         initialPosition,
         breakpoint
-      };
-      setFrameResults(prevResults => [...prevResults, combinedResult]);
+      }]);
     } catch (error) {
-      console.error('Error sending data to backend:', error);
+      console.error('Lunge analysis error:', error);
     }
   };
 
   useEffect(() => {
     let captureInterval;
-
+    let camera;
     if (isStarted) {
-      const camera = new Camera(videoRef.current, {
+      camera = new Camera(videoRef.current, {
         onFrame: async () => {
           await pose.send({ image: videoRef.current });
         },
@@ -355,9 +384,9 @@ function Exercise() {
       });
     }
     return () => {
-      if (captureInterval) {
-        clearInterval(captureInterval);
-      }
+      if (camera) camera.stop();
+      if (captureInterval) clearInterval(captureInterval);
+      pose.onResults(null);
     };
   }, [isStarted, slug]);
 
@@ -410,5 +439,4 @@ function Exercise() {
     </div>
   );
 }
-
 export default Exercise;
