@@ -447,36 +447,42 @@ function Exercise() {
   useEffect(() => {
     let captureInterval;
     let camera;
+    let analysis;
     if (isStarted) {
-      camera = new Camera(videoRef.current, {
-        onFrame: async () => {
-          await pose.send({ image: videoRef.current });
-        },
-        width: 640,
-        height: 480,
-      });
-
-      camera.start();
-
-      captureInterval = setInterval(() => {
-        if (videoRef.current) {
-          pose.send({ image: videoRef.current });
-        }
-      }, 1000 / 24); // 24 fps
+      if (videoRef.current) {
+        camera = new Camera(videoRef.current, {
+          onFrame: async () => {
+            if (videoRef.current) {
+              await pose.send({ image: videoRef.current });
+            }
+          },
+          width: 640,
+          height: 480,
+        });
+  
+        camera.start();
+  
+        captureInterval = setInterval(() => {
+          if (videoRef.current) {
+            pose.send({ image: videoRef.current });
+          }
+        }, 2000); // 24 fps
+      } else {
+        console.error("Video element not found.");
+      }
 
       pose.onResults((results) => {
-        if (results.poseLandmarks) {
-          let analysis;
+        if (results.poseLandmarks && results.poseLandmarks.length > 0) {
           // Call the corresponding exercise analysis method based on the slug name
-          if (slug === "lateral-raises") {
+          if (slug === "lateral_raises") {
             analysis = analyzeLateralRaises(results.poseLandmarks);
-          } else if (slug === "shoulder-press") {
+          } else if (slug === "shoulder_press") {
             analysis = analyzeShoulderPress(results.poseLandmarks);
-          } else if (slug === "cable-lateral-raises") {
+          } else if (slug === "cable_lateral_raises") {
             analysis = analyzeCableLateralRaises(results.poseLandmarks);
-          } else if (slug === "bench-press") {
+          } else if (slug === "bench_press") {
             analysis = analyzeBenchPress(results.poseLandmarks);
-          } else if (slug === "cable-crossover") {
+          } else if (slug === "cable_crossover") {
             analysis = analyzeCableCrossover(results.poseLandmarks);
           } else if (slug === "rope_overhead_extensions") {
             analysis = analyzeRopeExtensions(results.poseLandmarks);
@@ -493,8 +499,10 @@ function Exercise() {
             analysis = analyzeLunges(results.poseLandmarks);
             return;
           }
+          console.log(analysis);
           // For synchronous analyses, add the result.
           setFrameResults((prevResults) => [...prevResults, analysis]);
+          console.log(frameResults);
         }
       });
     }
@@ -511,7 +519,7 @@ function Exercise() {
     if (slug !== "plank" && frameResults.length > 0) {
       const lastFrame = frameResults[frameResults.length - 1];
       // A rep cycle is considered complete when the latest frame has initialPosition === 1
-      if (lastFrame.initialPosition === 1) {
+      if (lastFrame && lastFrame.initialPosition === 1) {
         // Only consider frames after the last counted rep.
         const startIndex = lastRepIndex.current + 1;
         const lastIndex = frameResults.length - 1;
@@ -541,29 +549,37 @@ function Exercise() {
   useEffect(() => {
     if (frameResults.length > 0) {
       const lastFrame = frameResults[frameResults.length - 1];
-      // For every property that is not "breakpoint" or "initialPosition",
-      // update its consecutive count.
-      const mistakeKeys = Object.keys(lastFrame).filter(
-        (key) => key !== "breakpoint" && key !== "initialPosition"
-      );
-      mistakeKeys.forEach((key) => {
-        if (lastFrame[key] === 1) {
-          mistakeCountersRef.current[key] =
-            (mistakeCountersRef.current[key] || 0) + 1;
-          if (mistakeCountersRef.current[key] === 10) {
-            playAudio(slug, key);
+  
+      // Check if lastFrame is valid and not null
+      if (lastFrame) {
+        const mistakeKeys = Object.keys(lastFrame).filter(
+          (key) => key !== "breakpoint" && key !== "initialPosition"
+        );
+  
+        mistakeKeys.forEach((key) => {
+          if (lastFrame[key] === 1) {
+            mistakeCountersRef.current[key] =
+              (mistakeCountersRef.current[key] || 0) + 1;
+            if (mistakeCountersRef.current[key] === 10) {
+              playAudio(slug, key);
+            }
+          } else {
+            mistakeCountersRef.current[key] = 0;
           }
-        } else {
-          mistakeCountersRef.current[key] = 0;
-        }
-      });
-      Object.keys(mistakeCountersRef.current).forEach((key) => {
-        if (!mistakeKeys.includes(key)) {
-          mistakeCountersRef.current[key] = 0;
-        }
-      });
+        });
+  
+        // Reset counters for properties not present in lastFrame
+        Object.keys(mistakeCountersRef.current).forEach((key) => {
+          if (!mistakeKeys.includes(key)) {
+            mistakeCountersRef.current[key] = 0;
+          }
+        });
+      } else {
+        console.error("lastFrame is undefined or null");
+      }
     }
   }, [frameResults, slug]);
+  
 
   //  Audio Playback Helper
   const playAudio = (slug, mistakeType) => {
@@ -604,13 +620,17 @@ function Exercise() {
     const totalFrames = frameResults.length;
     const mistakeCounts = {};
     frameResults.forEach((frame) => {
-      Object.keys(frame).forEach((key) => {
-        if (key !== "breakpoint" && key !== "initialPosition") {
-          if (frame[key] === 1) {
-            mistakeCounts[key] = (mistakeCounts[key] || 0) + 1;
+      if (frame && typeof frame === "object") {
+        Object.keys(frame).forEach((key) => {
+          if (key !== "breakpoint" && key !== "initialPosition") {
+            if (frame[key] === 1) {
+              mistakeCounts[key] = (mistakeCounts[key] || 0) + 1;
+            }
           }
-        }
-      });
+        });
+      } else {
+        console.error("Invalid frame:", frame); 
+      }
     });
     const mistakePercentages = {};
     for (const key in mistakeCounts) {
@@ -627,7 +647,7 @@ function Exercise() {
     } catch (error) {
       console.error("Error sending report", error);
     }
-
+    console.log(frameResults);
     navigate(`/report/${slug}`, {
       state: { results: frameResults, report: reportData },
     });
@@ -675,5 +695,6 @@ function Exercise() {
     </div>
   );
 }
+
 
 export default Exercise;
