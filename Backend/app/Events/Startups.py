@@ -10,3 +10,4 @@ async def on_startup():
         print("Creating tables...")
         await conn.run_sync(Base.metadata.create_all)
         print("Tables created.")
+    
