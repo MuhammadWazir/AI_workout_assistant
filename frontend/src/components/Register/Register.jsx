@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Profile } from "../../assets/Profile.jsx";
 import { Key } from "../../assets/Key.jsx";
 import { Mail } from "../../assets/Mail.jsx";
-import Google from "../../assets/Google.jsx";
-import Facebook from "../../assets/Facebook.jsx";
 import "./register_style.css";
 
 const Register = () => {
@@ -54,7 +52,7 @@ const Register = () => {
       <section className="frame">
         <button className="login-button">
           <div className="div-wrapper">
-            <h1 className="text-wrapper">Login</h1>
+            <h1 className="text-wrapper">Register</h1>
           </div>
         </button>
         <p className="don-t-have-an">
@@ -100,32 +98,7 @@ const Register = () => {
           />
         </div>
         {error && <p className="error">{error}</p>}
-        <button type="submit" className="submit-button">
-          Register
-        </button>
       </form>
-
-      <section className="frame-4">
-        <p className="text-wrapper-5">Sign up with</p>
-        <div className="frame-5">
-          <button className="google-sign-in" aria-label="Sign up with Google">
-            <div className="overlap-group">
-              <Google className="google" />
-              <span className="text-wrapper-6">Google</span>
-            </div>
-          </button>
-
-          <button
-            className="facebook-sign-in"
-            aria-label="Sign up with Facebook"
-          >
-            <div className="overlap-2">
-              <Facebook className="facebook" />
-              <span className="text-wrapper-7">Facebook</span>
-            </div>
-          </button>
-        </div>
-      </section>
     </main>
   );
 };

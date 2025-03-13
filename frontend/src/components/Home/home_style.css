@@ -65,16 +65,25 @@ html, body {
     border-radius: 50%;
   }
   
-  /* Streaks Section */
-  .home-image-section {
-    margin: 20px;
-  }
-  
-  .home-image-background {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
+/* Home Image Section */
+.home-image-section {
+  flex: 1 1 40%;  /* Make the image section take up 40% of the width */
+  margin-right: 20px;
+  display: flex;
+  justify-content: center;
+  position: relative;  /* Ensure we can apply absolute positioning to the gradient */
+}
+
+.home-image-background {
+  width: 100%;
+  height: auto;
+  display: block;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-size: cover;  /* Ensure it covers the image */
+  mask-size: cover;
+}
+
   
   /* Exercises Section */
   .exercises-section {
@@ -98,3 +107,92 @@ html, body {
     flex-direction: column;
     gap: 15px;
   }
+
+/* Desktop responsiveness */
+@media (min-width: 1024px) {
+  /* Main Container */
+  .home {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: 100vh;
+    padding: 20px;
+  }
+
+  /* Header */
+  .header {
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .profile {
+    gap: 20px;
+  }
+
+  .greeting {
+    font-size: 24px;
+  }
+
+  .menu-dots {
+    gap: 10px;
+  }
+
+  /* Home Image and Exercises Container */
+  .home-image-exercises-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  /* Home Image Section */
+  .home-image-section {
+    flex: 1 1 40%;  /* Make the image section take up 40% of the width */
+    margin-right: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .home-image-background {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Exercises Section */
+  .exercises-section {
+    flex: 1 1 55%;  /* Make the exercises section take up 55% of the width */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .exercises-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .exercises-title {
+    font-size: 24px;
+  }
+
+  .exercise-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .exercise-list > div {
+    flex: 1 1 45%;  /* Ensure each exercise card takes up 45% of the width */
+    min-width: 220px; /* Ensure a minimum width for the cards */
+  }
+}
