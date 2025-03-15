@@ -466,7 +466,7 @@ function Exercise() {
           if (videoRef.current) {
             pose.send({ image: videoRef.current });
           }
-        }, 2000); // 24 fps
+        }, 1000/24); // 24 fps
       } else {
         console.error("Video element not found.");
       }
@@ -581,21 +581,75 @@ function Exercise() {
   }, [frameResults, slug]);
   
 
-  //  Audio Playback Helper
-  const playAudio = (slug, mistakeType) => {
-    let audioFile = "";
-    // Choose an audio file based on the exercise slug and mistake type.
-    if (slug === "lateral-raises" && mistakeType === "curvedArms") {
-      audioFile = "/audio/lateral-raises_curvedArms.mp3";
-    } else if (slug === "shoulder-press" && mistakeType === "armsTooWide") {
-      audioFile = "/audio/shoulder-press_armsTooWide.mp3";
-    }
-    // Add more conditions for other exercises and mistake types as needed.
-    if (audioFile) {
-      const audio = new Audio(audioFile);
-      audio.play();
-    }
-  };
+  // Audio Playback Helper
+const playAudio = (slug, mistakeType) => {
+  let audioFile = "";
+  
+  // Handle slug and mistake cases
+  switch (slug) {
+    case "lateral-raises":
+      if (mistakeType === "curvedArms") {
+        audioFile = "/audio/dont_bend_your_arms.mp3";
+      }
+      break;
+    case "shoulder-press":
+      if (mistakeType === "armsTooWide") {
+        audioFile = "/audio/arms_too_wide.mp3";
+      }
+      break;
+    case "cable-lateral-raises":
+      if (mistakeType === "bentArms") {
+        audioFile = "/audio/dont_bend_your_arms.mp3";
+      }
+      break;
+    case "bench-press":
+      if (mistakeType === "wristsTooNarrow") {
+        audioFile = "/audio/wrists_too_narrow.mp3";
+      }
+      break;
+    case "cable-crossover":
+      if (mistakeType === "bentArmsAtBreakpoint") {
+        audioFile = "/audio/bent_arms_at_breakpoint.mp3";
+      }
+      break;
+    case "rope-overhead-extensions":
+      if (mistakeType === "flaredElbows") {
+        audioFile = "/audio/bring_your_elbows_together.mp3";
+      }
+      break;
+    case "inclined-dumbell-press":
+      if (mistakeType === "flaredElbows") {
+        audioFile = "/audio/bring_your_elbows_together.mp3";
+      }
+      break;
+    case "plank":
+      if (mistakeType === "back_too_high") {
+        audioFile = "/audio/back_too_high.mp3";
+      }
+      if (mistakeType === "back_too_low") {
+        audioFile = "/audio/back_too_low.mp3";
+      }
+      break;
+    case "bicep-curls":
+      if (mistakeType === "leaned_back") {
+        audioFile = "/audio/dont_lean_back.mp3";
+      }
+      break;
+    case "lunges":
+      if (mistakeType === "knee_over_toe") {
+        audioFile = "/audio/knee_over_toe.mp3";
+      }
+      break;
+    default:
+      console.warn("Unknown slug or mistake type:", slug, mistakeType);
+      return;
+  }
+  if (audioFile) {
+    const audio = new Audio(audioFile);
+    audio.play();
+  }
+};
+
 
   //Handle Start & Stop
   const handleStart = async () => {
