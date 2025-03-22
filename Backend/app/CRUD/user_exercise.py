@@ -25,3 +25,9 @@ def update_user_exercise_data(db: Session, user_id: int, exercise_name: str, cor
     db.commit()
     db.refresh(record)
     return record
+
+def get_user_exercise_data_by_name(db: Session, user_id: int, exercise_name: str):
+    return db.query(UserExerciseData).filter(
+        UserExerciseData.user_id == user_id,
+        UserExerciseData.exercise_name == exercise_name
+    ).first()
