@@ -1,14 +1,23 @@
-from sqlalchemy.orm import Session
-from app.models.user_exercise_data import UserExerciseData
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from models.user_exercise_data import UserExerciseData
 
-def get_user_exercise_data(db: Session, user_id: int):
-    return db.query(UserExerciseData).filter(UserExerciseData.user_id == user_id).all()
-
-def update_user_exercise_data(db: Session, user_id: int, exercise_name: str, correct_percentage: float, incorrect_percentage: float):
-    record = db.query(UserExerciseData).filter(
+async def get_user_exercise_data(db: AsyncSession, user_id: int):
+    stmt = select(UserExerciseData).filter(UserExerciseData.user_id == user_id)
+    if not stmt:
+        return None
+    result = await db.execute(stmt)
+    return result.scalars().all() 
+ 
+async def update_user_exercise_data(db: AsyncSession, user_id: int, exercise_name: str, correct_percentage: float, incorrect_percentage: float):
+    stmt = select(UserExerciseData).filter(
         UserExerciseData.user_id == user_id,
         UserExerciseData.exercise_name == exercise_name
-    ).first()
+    )
+    if not stmt:
+        return None
+    result = await db.execute(stmt)
+    record = result.scalars().first()
 
     if record:
         record.correct_percentage = correct_percentage
@@ -22,12 +31,16 @@ def update_user_exercise_data(db: Session, user_id: int, exercise_name: str, cor
         )
         db.add(record)
 
-    db.commit()
-    db.refresh(record)
+    await db.commit()  
+    await db.refresh(record)  
     return record
 
-def get_user_exercise_data_by_name(db: Session, user_id: int, exercise_name: str):
-    return db.query(UserExerciseData).filter(
+async def get_user_exercise_data_by_name(db: AsyncSession, user_id: int, exercise_name: str):
+    stmt = select(UserExerciseData).filter(
         UserExerciseData.user_id == user_id,
         UserExerciseData.exercise_name == exercise_name
-    ).first()
+    )
+    if not stmt:
+        return None
+    result = await db.execute(stmt)
+    return result.scalars().first() 

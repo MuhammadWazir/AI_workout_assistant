@@ -1,37 +1,54 @@
-from sqlalchemy import Session
-from app.models.user import User
+from sqlalchemy.future import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from models.user import User
 
-def get_user(db: Session, user_id: int):
-    return db.query(User).filter(User.id == user_id).first()
+async def get_user(db: AsyncSession, user_id: int):
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)  
+    return result.scalars().first()
 
-def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
+async def get_user_by_email(db: AsyncSession, email: str):
+    stmt = select(User).where(User.email == email)
+    result = await db.execute(stmt)  
+    return result.scalars().first()
 
-def get_user_by_username(db: Session, username: str):
-    return db.query(User).filter(User.username == username).first()
+async def get_user_by_username(db: AsyncSession, username: str):
+    stmt = select(User).where(User.username == username)
+    result = await db.execute(stmt)
+    return result.scalars().first()
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(User).offset(skip).limit(limit).all()
+async def get_users(db: AsyncSession, skip: int = 0, limit: int = 100):
+    stmt = select(User).offset(skip).limit(limit)
+    result = await db.execute(stmt) 
+    return result.scalars().all()
 
-def create_user(db: Session, username: str, email: str, hashed_password: str):
+# Create a user (async)
+async def create_user(db: AsyncSession, username: str, email: str, hashed_password: str):
     user = User(username=username, email=email, hashed_password=hashed_password)
     db.add(user)
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
     return user
 
-def update_user(db: Session, user_id: int, username: str, email: str, hashed_password: str):
-    user = db.query(User).filter(User.id == user_id).first()
-    user.username = username
-    user.email = email
-    user.hashed_password = hashed_password
-    db.commit()
-    db.refresh(user)
-    return user
+async def update_user(db: AsyncSession, user_id: int, username: str, email: str, hashed_password: str):
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalars().first()
+    if user:
+        user.username = username
+        user.email = email
+        user.hashed_password = hashed_password
+        await db.commit() 
+        await db.refresh(user)  
+        return user
+    return None
 
-def delete_user(db: Session, user_id: int):
-    user = db.query(User).filter(User.id == user_id).first()
-    db.delete(user)
-    db.commit()
-    return user
-
+async def delete_user(db: AsyncSession, user_id: int):
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalars().first()
+    if user:
+        await db.delete(user)
+        await db.commit() 
+        return user
+    return None

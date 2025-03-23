@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.schemas.user import UserCreate
-from app.database import get_db
-from app.models.user import User
-from app.schemas.user import UserCreate
-from app.core.security import hash_password, create_access_token, verify_password
+from schemas.user import UserCreate
+from database import get_db
+from models.user import User
+from schemas.user import UserCreate
+from core.security import hash_password, create_access_token, verify_password
 
 
 
@@ -14,14 +14,10 @@ router = APIRouter()
 
 @router.post("/signup", status_code=201)
 async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
-    
     try:
         stmt = select(User).where(User.email == user.email)
-        print(stmt)
         result = await db.execute(stmt)
-        print("I am here 1")
         existing_user = result.scalars().first()
-        print("I am here 2")
         if existing_user:
             raise HTTPException(status_code=400, detail="Email is already registered.")
 
@@ -37,7 +33,6 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         return {"message": "User created successfully", "user_id": new_user.id}
 
     except Exception as e:
-        print(" YOU IDIOT ", Exception)
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @router.post("/login")

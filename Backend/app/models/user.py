@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-Base = declarative_base()
+from database import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -11,4 +11,4 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
 
-    exercise_data = relationship("UserExerciseData", back_populates="user")
+    exercise_data = relationship("UserExerciseData", back_populates="user", cascade="all, delete-orphan")
