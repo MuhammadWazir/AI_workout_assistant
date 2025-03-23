@@ -1,115 +1,121 @@
-import React from "react";
-import "./home_style.css";
-import ExerciseCard from "../ExerciseCard/ExerciseCard";
-import { useState } from "react";
-import { useEffect } from "react";
+"use client"
+
+import { useState, useEffect } from "react"
+import "./home_style.css"
+import ExerciseCard from "../ExerciseCard/ExerciseCard"
+import HeroSection from "../HeroSection/HeroSection"
 
 const Home = () => {
   const exercises = [
     { name: "Plank", imageSrc: "./plank.png", altText: "Plank", slug: "plank" },
     { name: "Bicep Curls", imageSrc: "./bicep_curls.png", altText: "Bicep Curls", slug: "bicep_curls" },
     { name: "Lunges", imageSrc: "./lunges.png", altText: "Lunges", slug: "lunges" },
-    { name: "Bench Press", imageSrc: "./bench_press.png", altText: "Bench Press", slug: "bench_press" },
-  ];
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  ]
+
+  const [heroMounted, setHeroMounted] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    // Trigger animation after component mounts
+    setHeroMounted(true);
+  }, []);
 
   // Check if an access token exists in localStorage to set authentication state
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("access_token")
     if (token) {
-      setIsAuthenticated(true);
+      setIsAuthenticated(true)
     } else {
-      setIsAuthenticated(false);
+      setIsAuthenticated(false)
     }
-  }, []);
+  }, [])
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
-  };
+  const toggleDropdown = (menu) => {
+    setActiveDropdown(activeDropdown === menu ? null : menu) // Close if already open
+  }
 
-  const toggleMenu = (menu) => {
-    setActiveMenu(activeMenu === menu ? null : menu);  // Close if already open
-  };
-
-  const closeSidebar = (e) => {
-    if (e.target.closest(".menu-dots") || e.target.closest(".sidebar")) {
-      return; // Don't close if clicking inside the dots or sidebar
+  const closeDropdowns = (e) => {
+    // Don't close if clicking inside a dropdown toggle or the dropdown itself
+    if (e.target.closest(".dropdown-toggle") || e.target.closest(".dropdown-menu")) {
+      return
     }
-    setSidebarOpen(false); // Close sidebar if clicked outside
-  };
+    setActiveDropdown(null) // Close all dropdowns if clicked outside
+  }
 
   useEffect(() => {
-    // Event listener to close the sidebar when clicking outside of it
-    document.addEventListener("click", closeSidebar);
+    // Event listener to close dropdowns when clicking outside of them
+    document.addEventListener("click", closeDropdowns)
 
     // Cleanup the event listener when component unmounts
     return () => {
-      document.removeEventListener("click", closeSidebar);
-    };
-  }, []);
+      document.removeEventListener("click", closeDropdowns)
+    }
+  }, [])
 
   return (
     <main className="home">
-      <header className="header">
-        <div className="profile"></div>
-        <div className="menu-dots" onClick={toggleSidebar}>
-          <div className="dot"></div>
-          <div className="dot"></div>
-          <div className="dot"></div>
+      <header className="main-header">
+        <div className="logo">
+          <h1>FitTrack</h1>
         </div>
-      </header>
 
-      {/* Sidebar */}
-      {isSidebarOpen && (
-        <div className="sidebar">
-          <ul>
-            {/* Conditional rendering based on authentication state */}
+        <nav className="main-nav">
+          <ul className="nav-links">
             {!isAuthenticated ? (
               <>
-                <li>Login</li>
-                <li>Register</li>
+                <li className="nav-item"><a href="/login">Login</a></li>
+                <li className="nav-item"><a href="/register">Register</a></li>
               </>
             ) : (
               <>
-                <li onClick={() => toggleMenu("account")}>
-                  {activeMenu === "account" ? "Close Account" : "Account Center"}
+                <li className="nav-item dropdown">
+                  <span 
+                    className="dropdown-toggle" 
+                    onClick={() => toggleDropdown("account")}
+                  >
+                    Account Center
+                    <i className={`dropdown-arrow ${activeDropdown === "account" ? "active" : ""}`}></i>
+                  </span>
+                  {activeDropdown === "account" && (
+                    <ul className="dropdown-menu">
+                      <li><a href="/account/info">View User Info</a></li>
+                      <li><a href="/account/update">Update User Info</a></li>
+                      <li><a href="/account/delete">Delete User</a></li>
+                    </ul>
+                  )}
                 </li>
-                {activeMenu === "account" && (
-                  <ul>
-                    <li>View User Info</li>
-                    <li>Update User Info</li>
-                    <li>Delete User</li>
-                  </ul>
-                )}
-                <li onClick={() => toggleMenu("tracker")}>
-                  {activeMenu === "tracker" ? "Close Tracker" : "Workout Tracker"}
+                <li className="nav-item dropdown">
+                  <span 
+                    className="dropdown-toggle" 
+                    onClick={() => toggleDropdown("tracker")}
+                  >
+                    Workout Tracker
+                    <i className={`dropdown-arrow ${activeDropdown === "tracker" ? "active" : ""}`}></i>
+                  </span>
+                  {activeDropdown === "tracker" && (
+                    <ul className="dropdown-menu">
+                      <li><a href="/tracker/date">Date Picker</a></li>
+                      <li><a href="/tracker/data">Exercise Data</a></li>
+                    </ul>
+                  )}
                 </li>
-                {activeMenu === "tracker" && (
-                  <ul>
-                    <li>Date Picker Page</li>
-                    <li>Exercise Data</li>
-                  </ul>
-                )}
-                {/* Chatbot only for authenticated users */}
-                <li>Chatbot</li>
+                <li className="nav-item">
+                  <a href="/chatbot">Chatbot</a>
+                </li>
               </>
             )}
           </ul>
-        </div>
-      )}
+        </nav>
+      </header>
 
-      <section className="home-image-exercises-container">
-        <div className="home-image-section">
-          <img
-            className="home-image-background"
-            alt="Workout"
-            src="./home_image.png"
-          />
-        </div>
+      {/* Simple wrapper div for desktop layout */}
+      <div className="desktop-container">
+        {/* Hero Section */}
+        <HeroSection mounted={heroMounted}/>
 
-        <div className="exercises-section">
+        {/* Exercises Section - Added id for direct scrolling */}
+        <div className="exercises-section" id="exercises">
           <header className="exercises-header">
             <h2 className="exercises-title">Exercises</h2>
           </header>
@@ -126,9 +132,9 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </div>
     </main>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
