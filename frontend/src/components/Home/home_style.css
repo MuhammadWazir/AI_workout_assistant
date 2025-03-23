@@ -196,3 +196,44 @@ html, body {
     min-width: 220px; /* Ensure a minimum width for the cards */
   }
 }
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  background-color: #333;
+  width: 250px;
+  height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.sidebar li {
+  cursor: pointer;
+  padding: 10px;
+}
+
+.sidebar li:hover {
+  background-color: #555;
+}
+
+.sidebar li ul {
+  list-style-type: none;
+  padding-left: 20px;
+}
+
+.sidebar li ul li {
+  padding: 5px 10px;
+}
+
+.sidebar li ul li:hover {
+  background-color: #666;
+}
+
