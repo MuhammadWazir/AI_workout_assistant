@@ -27,8 +27,8 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         db.add(new_user)
         await db.commit()
         await db.refresh(new_user)
-
-        return {"message": "User created successfully", "user_id": new_user.id}
+        token = create_access_token({"sub": user.email})
+        return {"message": "User created successfully", "user_id": new_user.id, "token": token, "token_type": "bearer"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
