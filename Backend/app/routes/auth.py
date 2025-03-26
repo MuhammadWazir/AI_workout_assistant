@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 from schemas.user import UserCreate
 from database import get_db
 from models.user import User
-from schemas.user import UserCreate
+from schemas.user import UserCreate, UserLogin
 from core.security import hash_password, create_access_token, verify_password
 
 
@@ -36,7 +36,7 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @router.post("/login")
-async def login(user: UserCreate, db: AsyncSession = Depends(get_db)):
+async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     
     stmt = select(User).where(User.email == user.email)
     print(stmt)

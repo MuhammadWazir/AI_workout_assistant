@@ -6,11 +6,20 @@ from CRUD import user_exercise, users
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
 from database import get_db
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Exercise Correction API",
     description="API for tracking and correcting workouts based on exercise performance.",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Your frontend URL (React/Vue/Svelte)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allows all headers
 )
 
 # Include routers for authentication and user operations.
