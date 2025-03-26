@@ -34,7 +34,10 @@ const Home = () => {
   const toggleDropdown = (menu) => {
     setActiveDropdown(activeDropdown === menu ? null : menu) // Close if already open
   }
-
+  const handleLogout= () =>{
+    localStorage.removeItem("access_token");
+    
+  }
   const closeDropdowns = (e) => {
     // Don't close if clicking inside a dropdown toggle or the dropdown itself
     if (e.target.closest(".dropdown-toggle") || e.target.closest(".dropdown-menu")) {
@@ -82,6 +85,7 @@ const Home = () => {
                       <li><a href="/account/info">View User Info</a></li>
                       <li><a href="/account/update">Update User Info</a></li>
                       <li><a href="/account/delete">Delete User</a></li>
+                      <li onClick={handleLogout}><a href="/"> Logout</a></li>
                     </ul>
                   )}
                 </li>
