@@ -1,0 +1,152 @@
+.hero-section {
+    width: 95vw;
+    height: min-content;
+    margin-bottom: 30px;
+    position: relative;
+}
+  
+.hero-image-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+  
+.hero-background-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Overlay for faded edges - using exact #0e0e0e color */
+.hero-image-container::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(14, 14, 14, 0) 50%,  /* Transparent center */
+        #0e0e0e 100%              /* Exact match to background color */
+    );
+    z-index: 1;
+}
+  
+.hero-content-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.3) 100%);
+    display: flex;
+    align-items: center;
+    z-index: 2;
+}
+  
+.hero-text {
+    padding: 0 50px;
+    max-width: 600px;
+}
+  
+.hero-text h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: white;
+    letter-spacing: 1px;
+}
+  
+.hero-text p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: #e0e0e0;
+    line-height: 1.6;
+}
+  
+.hero-button {
+    background-color: #007AFF;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+  
+.hero-button:hover {
+    background-color: #0959ae;
+}
+
+@media (min-width: 1024px) {
+    .hero-section {
+      height: calc(100vh - 80px); /* Subtract header height */
+      margin-bottom: 0;
+      display: flex;
+      align-items: stretch;
+    }
+  
+    .hero-image-container {
+      height: 100%;
+    }
+  
+    .hero-background-image {
+      height: 100%;
+      object-position: center top;
+    }
+  }
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+    .hero-image-container {
+        height: 400px;
+    }
+  
+    .hero-text {
+        padding: 0 30px;
+        text-align: center;
+        margin: 0 auto;
+    }
+  
+    .hero-text h1 {
+        font-size: 2.2rem;
+    }
+  
+    .hero-text p {
+        font-size: 1rem;
+    }
+}
+  
+@media (max-width: 480px) {
+    .hero-image-container {
+        height: 350px;
+    }
+  
+    .hero-text h1 {
+        font-size: 1.8rem;
+    }
+}
+/* Fade-in animation */
+@keyframes heroFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .hero-section.fade-in {
+    animation: heroFadeIn 0.8s ease-out forwards;
+  }
+  
+  /* Initial state before animation */
+  .hero-section:not(.fade-in) {
+    opacity: 0;
+  }

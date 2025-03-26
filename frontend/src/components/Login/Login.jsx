@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Profile } from "../../assets/Profile.jsx";
 import { Key } from "../../assets/Key.jsx";
+import axios from "axios";
 import "./login_style.css";
 
 const Login = () => {
@@ -11,6 +12,7 @@ const Login = () => {
     password: "",
   });
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -20,36 +22,71 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
+
     try {
-      const response = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.detail || "Login failed. Please try again.");
-        return;
-      }
+      const response = await axios.post(
+        "http://localhost:8080/auth/login",
+        formData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       // Store the JWT token returned by the backend
-      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("access_token", response.data.access_token);
+      
       // Redirect to /home on successful login
-      navigate("/home");
-    } catch (err) {
-      console.error("Error:", err);
-      setError("An error occurred. Please try again later.");
+      navigate("/");
+    } catch (error) {
+      // Handle different error cases
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        switch (error.response.status) {
+          case 400:
+            setError(error.response.data.detail || "Invalid credentials");
+            break;
+          case 422:
+            if (Array.isArray(error.response.data.detail)) {
+              const errors = error.response.data.detail.map(err => 
+                `${err.loc ? err.loc.join('.') + ' ' : ''}${err.msg}`
+              ).join(', ');
+              setError(`Validation errors: ${errors}`);
+            } else {
+              setError(error.response.data.detail || "Validation failed");
+            }
+            break;
+          case 500:
+            setError("Server error - please try again later");
+            break;
+          default:
+            setError(`Error: ${error.response.data.detail || "Login failed"}`);
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError("Network error - please check your connection");
+      } else {
+        // Something happened in setting up the request
+        setError("Request setup error - please try again");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <main className="login">
       <section className="frame">
-        <button className="login-button">
+        <button 
+          type="submit" 
+          className="login-button"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
           <div className="div-wrapper">
-            <h1 className="text-wrapper">Login</h1>
+            <h1 className="text-wrapper">
+              {isSubmitting ? "Logging in..." : "Login"}
+            </h1>
           </div>
         </button>
         <p className="don-t-have-an">
@@ -72,6 +109,7 @@ const Login = () => {
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -85,6 +123,7 @@ const Login = () => {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
+              required
             />
           </div>
           {error && <p className="error">{error}</p>}

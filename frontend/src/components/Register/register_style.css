@@ -122,6 +122,40 @@ html, body {
   cursor: pointer;
   margin-top: 20px;
 }
+.back-link {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: #2e8fe4;
+  font-family: "Quicksand-Bold", Helvetica, sans-serif;
+  text-decoration: none;
+  font-size: 16px;
+  transition: opacity 0.3s;
+}
+
+.back-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.login-button .div-wrapper {
+  transition: all 0.3s ease;
+}
+
+.login-button:hover .div-wrapper {
+  transform: scale(1.05);
+  opacity: 0.9;
+  background-color: #1e7bcb;
+}
+
+.text-wrapper-2 {
+  transition: all 0.3s ease;
+}
+
+.text-wrapper-2:hover {
+  color: #a0d4ff !important; 
+  text-decoration: underline;
+}
 
 @media (max-width: 768px) {
   .login .frame {

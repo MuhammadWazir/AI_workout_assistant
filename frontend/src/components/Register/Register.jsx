@@ -1,69 +1,125 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Profile } from "../../assets/Profile.jsx";
-import { Key } from "../../assets/Key.jsx";
-import { Mail } from "../../assets/Mail.jsx";
-import "./register_style.css";
+"use client"
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Profile } from "../../assets/Profile.jsx"
+import { Key } from "../../assets/Key.jsx"
+import { Mail } from "../../assets/Mail.jsx"
+import axios from "axios"
+import "./register_style.css"
 
 const Register = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
+    full_name: "",  // Added full_name field
     username: "",
     email: "",
     password: "",
-  });
-  const [error, setError] = useState("");
+  })
+  const [error, setError] = useState("")
 
   const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [id]: value }));
-  };
+    const { id, value } = e.target
+    setFormData((prevData) => ({ ...prevData, [id]: value }))
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(""); 
+    e.preventDefault()
+    setError("")
+
+    if (!formData.full_name || !formData.username || !formData.email || !formData.password) {
+      setError("All fields are required")
+      return
+    }
+    if (formData.full_name.trim().split(" ").length < 2) {
+      setError("Full name must include both first and last name")
+      return
+    }
+    if (formData.full_name.length < 3) {
+      setError("Full name must be at least 3 characters")
+      return
+    }
+
+    if (formData.username.length < 3) {
+      setError("Username must be at least 3 characters")
+      return
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(formData.username)) {
+      setError("Username must contain only letters, numbers, underscores, and hyphens")
+      return
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError("Please enter a valid email address")
+      return
+    }
+
+    // Strong password validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    if (!passwordRegex.test(formData.password)) {
+      setError("Password must be at least 8 characters, including one uppercase, one lowercase, one number, and one special character (@$!%*?&)")
+      return
+    }
 
     try {
-      const response = await fetch("http://localhost:8000/auth/signup", {
-        method: "POST",
+      const response = await axios.post("http://localhost:8080/auth/signup", formData, {
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      })
 
-      // If the response isn't ok, get error message from backend and set it to state.
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.detail || "An error occurred. Please try again.");
-        return;
+      // Handle successful registration
+      if (response.status === 201) {
+        navigate("/login", {
+          state: { registrationSuccess: true }
+        })
+      } else {
+        setError("Registration successful, but unexpected response")
       }
-
-      const data = await response.json();
-
-      // Redirect to /home on success
-      navigate("/login");
-    } catch (error) {
-      console.error("Error:", error);
-      setError("An error occurred. Please try again later.");
+    }catch (error) {
+      if (error.response) {
+        if (error.response.status === 422) {
+          if (Array.isArray(error.response.data.detail)) {
+            const errorMessages = error.response.data.detail.map((err) => `${err.loc[1]}: ${err.msg}`).join("\n")
+            setError(errorMessages)
+          } else {
+            setError(error.response.data.detail || "Validation failed")
+          }
+        } else {
+          setError(error.response.data.detail || "Registration failed")
+        }
+      } else {
+        setError("Network error. Please try again.")
+      }
+      console.error("Registration error:", error)
     }
-  };
+  }
 
   return (
     <main className="login">
+      <a href="/" className="back-link">Back</a>
       <section className="frame">
-        <button className="login-button">
-          <div className="div-wrapper">
-            <h1 className="text-wrapper">Register</h1>
-          </div>
-        </button>
+        <h1 className="text-wrapper">Register</h1>
         <p className="don-t-have-an">
-          <span className="span">Don't have an account yet? </span>
-          <a href="/register" className="text-wrapper-2">
-            Register
+          <span className="span">Already have an account? </span>
+          <a href="/login" className="text-wrapper-2">
+            Login
           </a>
         </p>
       </section>
 
       <form className="overlap" onSubmit={handleSubmit}>
+        {/* Added Full Name input */}
+        <div className="input-wrapper">
+          <Profile className="design-component-instance-node input-icon" />
+          <input
+            id="full_name"
+            type="text"
+            className="text-input"
+            placeholder="Full Name"
+            value={formData.full_name}
+            onChange={handleChange}
+          />
+        </div>
         <div className="input-wrapper">
           <Profile className="design-component-instance-node input-icon" />
           <input
@@ -98,9 +154,14 @@ const Register = () => {
           />
         </div>
         {error && <p className="error">{error}</p>}
+        <button type="submit" className="login-button">
+          <div className="div-wrapper">
+            <span className="text-wrapper">Register</span>
+          </div>
+        </button>
       </form>
     </main>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register
