@@ -8,8 +8,6 @@ from models.user import User
 from schemas.user import UserCreate
 from core.security import hash_password, create_access_token, verify_password
 
-
-
 router = APIRouter()
 
 @router.post("/signup", status_code=201)
