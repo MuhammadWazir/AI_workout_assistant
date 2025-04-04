@@ -10,6 +10,13 @@ const Home = () => {
     { name: "Plank", imageSrc: "./plank.png", altText: "Plank", slug: "plank" },
     { name: "Bicep Curls", imageSrc: "./bicep_curls.png", altText: "Bicep Curls", slug: "bicep_curls" },
     { name: "Lunges", imageSrc: "./lunges.png", altText: "Lunges", slug: "lunges" },
+    { name: "Bench Press", imageSrc: "./bench_press.png" , altText: "Bench Press", slug: "bench_press"},
+    { name: "Lateral Raises", imageSrc: "./lateral_raises.png", altText: "Lateral Raises", slug: "lateral_raises" },
+    { name: "Shoulder Press", imageSrc: "./shoulder_press.png", altText: "Shoulder Press", slug: "shoulder_press" },
+    { name: "Cable Lateral Raises", imageSrc: "./cable_lateral_raises.png", altText: "Cable Lateral Raises", slug: "cable_lateral_raises" },
+    { name: "Cable Crossover", imageSrc: "./cable_crossover.png", altText: "cable Crossover", slug: "cable_crossover" },
+    { name: "Rope Overhead Extensions", imageSrc: "./rope_overhead_extensions.png", altText: "Rope Overehead Extensions", slug: "rope_overhead_extensions" },
+    { name: "Inclined Dumbell Press", imageSrc: "./inclined_dumbell_press.png", altText: "Inclined Dumbell Press", slug: "inclined_dumbell_press" },
   ]
 
   const [heroMounted, setHeroMounted] = useState(false);
