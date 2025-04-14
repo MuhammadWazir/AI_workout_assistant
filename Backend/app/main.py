@@ -110,7 +110,7 @@ async def delete_user(
     # Allow deletion if admin or if deleting own account
     if current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    user_obj = await users.delete_user(db,user_id)
+    user_obj = await users.delete_user(db,  user_id)
     if user_obj is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user_obj
