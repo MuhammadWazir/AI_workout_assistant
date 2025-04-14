@@ -2,11 +2,10 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict
-from core.security import get_current_user  # Returns a User object with properties like role, id, etc.
+from core.security import get_current_user  
 from database import get_db
 from models.user import User
 from CRUD import user_exercise
-import httpx  # Used if you later integrate with a real external API
 
 router = APIRouter()
 
