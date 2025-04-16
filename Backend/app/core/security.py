@@ -13,7 +13,7 @@ from typing import Optional
 load_dotenv()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth_2_scheme = OAuth2PasswordBearer(tokenUrl = "token")
+oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key") 
 ALGORITHM = os.getenv("ALGORITHM", "HS256")

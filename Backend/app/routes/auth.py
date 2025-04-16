@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -33,18 +34,34 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
-@router.post("/login")
-async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
+# @router.post("/login")
+# async def login(user: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     
-    stmt = select(User).where(User.email == user.email)
-    print(stmt)
+#     stmt = select(User).where(User.username == user.username)
+#     print(stmt)
+#     result = await db.execute(stmt)
+#     print("I am here 1")
+#     existing_user = result.scalars().first()
+#     print("I am here 2")
+#     if not existing_user or not verify_password(user.password, existing_user.hashed_password):
+#         raise HTTPException(status_code=400, detail="Invalid credentials")
+
+#     # Generate JWT token
+#     token = create_access_token({"sub": str(user.)})
+#     return {"access_token": token, "token_type": "bearer"}
+
+@router.post("/login")
+async def login_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), 
+    db: AsyncSession = Depends(get_db)
+):
+    stmt = select(User).where(User.username == form_data.username) 
     result = await db.execute(stmt)
-    print("I am here 1")
-    existing_user = result.scalars().first()
-    print("I am here 2")
-    if not existing_user or not verify_password(user.password, existing_user.hashed_password):
+    user = result.scalars().first()
+
+    if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    # Generate JWT token
-    token = create_access_token({"sub": existing_user.email})
+    # Update here: Use user.id rather than user.email
+    token = create_access_token({"sub": str(user.id)})
     return {"access_token": token, "token_type": "bearer"}

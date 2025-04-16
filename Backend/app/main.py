@@ -1,3 +1,5 @@
+from datetime import date
+from typing import Optional
 from fastapi import FastAPI, HTTPException, Depends
 from routes import auth, user, exercises
 from database import engine
@@ -45,7 +47,7 @@ def read_root():
 
 # ----- User Endpoints -----
 
-@app.get("/users/{user_id}")
+@app.get("/users/{user_id}", tags=["Users"])
 async def read_user(
     user_id: int,
     current_user: User = Depends(get_current_user),
@@ -59,7 +61,7 @@ async def read_user(
         raise HTTPException(status_code=404, detail="User not found")
     return user_data
 
-@app.get("/users")
+@app.get("/users", tags=["Users"])
 async def read_users(
     skip: int = 0,
     limit: int = 100,
@@ -71,7 +73,7 @@ async def read_users(
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return await users.get_users(db, skip, limit)
 
-@app.post("/users")
+@app.post("/users", tags=["Users"])
 async def create_user(
     username: str,
     email: str,
@@ -84,7 +86,7 @@ async def create_user(
         raise HTTPException(status_code=400, detail="Email/Username is already registered.")
     return user_obj
 
-@app.put("/users/{user_id}")
+@app.put("/users/{user_id}", tags=["Users"])
 async def update_user(
     user_id: int,
     username: str,
@@ -101,7 +103,7 @@ async def update_user(
         raise HTTPException(status_code=404, detail="User not found")
     return user_obj
 
-@app.delete("/users/{user_id}")
+@app.delete("/users/{user_id}", tags=["Users"])
 async def delete_user(
     user_id: int,
     current_user: User = Depends(get_current_user),
@@ -129,7 +131,7 @@ async def read_user_by_email(
         raise HTTPException(status_code=404, detail="User not found")
     return user_obj
 
-@app.get("/users/username/{username}")
+@app.get("/users/username/{username}", tags=["Users"])
 async def read_user_by_username(
     username: str,
     current_user: User = Depends(get_current_user),
@@ -200,7 +202,6 @@ async def update_user_exercise_data_for_user(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # Allow update only if admin or if current user is the owner
     if current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     result = await user_exercise.update_user_exercise_data(db, user_id, exercise_name, correct_percentage, incorrect_percentage)
@@ -208,22 +209,32 @@ async def update_user_exercise_data_for_user(
         raise HTTPException(status_code=404, detail="No User Found")
     return result
 
-# Endpoint to get exercise data by exercise name for a given user
 @app.get("/users/{user_id}/exercise/{exercise_name}", tags=["Exercise"])
 async def read_user_exercise_data_by_name(
     user_id: int,
     exercise_name: str,
+    workout_date: Optional[date] = None, 
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # Allow access only if admin or if current user is the owner
     if current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    data = await user_exercise.get_user_exercise_data_by_name(db, user_id, exercise_name)
+    data = await user_exercise.get_user_exercise_data_by_name(db, user_id, exercise_name, workout_date)
     if not data:
         raise HTTPException(status_code=404, detail="No exercise data found for this user")
     return data
 
+@app.get("/users/{user_id}/exercise/{date}")
+async def read_user_exercise_date_by_date(
+    user_id: int,
+    workout_date: Optional[date] = None, 
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if current_user.role != "admin" and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    data = await user_exercise.get_user_exercise_data_by_date(db, user_id, workout_date)
+    
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, port=8080)
