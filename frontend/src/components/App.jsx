@@ -4,7 +4,7 @@ import Login from './Login/Login';
 import Register from './Register/Register';
 import Home from "./Home/Home"
 import Exercise from './Exercise';
-import Report from './Report';
+import Report from './Report/Report';
 import '../styles/main.css';
 
 function App() {
