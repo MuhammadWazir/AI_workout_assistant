@@ -1,6 +1,7 @@
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.user import User
+from core.security import hash_password, create_access_token, verify_password
 
 async def get_user(db: AsyncSession, user_id: int):
     stmt = select(User).where(User.id == user_id)
@@ -23,14 +24,16 @@ async def get_users(db: AsyncSession, skip: int = 0, limit: int = 100):
     return result.scalars().all()
 
 # Create a user (async)
-async def create_user(db: AsyncSession, username: str, email: str, hashed_password: str):
+async def create_user(db: AsyncSession, username: str, email: str, password: str):
+    hashed_password = hashed_password(password)
     user = User(username=username, email=email, hashed_password=hashed_password)
     db.add(user)
     await db.commit()
     await db.refresh(user)
     return user
 
-async def update_user(db: AsyncSession, user_id: int, username: str, email: str, hashed_password: str):
+async def update_user(db: AsyncSession, user_id: int, username: str, email: str, password: str):
+    hashed_password = hash_password(password)
     stmt = select(User).where(User.id == user_id)
     result = await db.execute(stmt)
     user = result.scalars().first()
