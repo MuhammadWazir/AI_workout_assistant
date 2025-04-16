@@ -104,7 +104,7 @@ function Report() {
         </div>
 
         <div className="mistakes-analysis">
-          <h3>Form Analysis</h3>
+          <h3>Mistake Analysis</h3>
 
           {report && report.mistakePercentages && Object.keys(report.mistakePercentages).length > 0 ? (
             <div className="mistakes-grid">
@@ -172,7 +172,7 @@ function Report() {
         <Link to={`/exercise/${name}`} className="action-button primary">
           Try Again
         </Link>
-        <Link to="/dashboard" className="action-button secondary">
+        <Link to="/" className="action-button secondary">
           Back to Dashboard
         </Link>
       </div>
@@ -186,7 +186,7 @@ function getFeedbackForMistake(mistakeType, percentage) {
 
   const feedbackMap = {
     curvedArms: `You have a ${severity} tendency to bend your arms during the exercise. Try to keep your arms straight for better form.`,
-    standingUpright: `Make sure to maintain an upright posture throughout the exercise.`,
+    standingUpright: `Make sure to maintain a bent posture throughout the exercise.`,
     armsTooWide: `Your arms are positioned too wide. Bring them closer to your body for proper form.`,
     bentArms: `Focus on keeping your arms straight during the movement for better muscle engagement.`,
     leaningBody: `Try to avoid leaning your body during the exercise. Maintain a stable core position.`,
