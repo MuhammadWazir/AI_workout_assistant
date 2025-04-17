@@ -981,7 +981,6 @@ function Exercise() {
   }
 
   const handleStop = async () => {
-    setIsStarted(false)
     if (videoRef.current && videoRef.current.srcObject instanceof MediaStream) {
       videoRef.current.srcObject.getTracks().forEach((track) => track.stop())
     }
@@ -1032,7 +1031,7 @@ function Exercise() {
 
       {!isStarted ? (
         <>
-          <div className="exercise-card2">
+          <div className="exercise-card-2">
             <h3 className="instruction-title">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1061,7 +1060,7 @@ function Exercise() {
             </ol>
           </div>
 
-          <div className="exercise-card">
+          <div className="exercise-card-2">
             <h3 className="instruction-title">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
