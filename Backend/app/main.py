@@ -1,6 +1,7 @@
 from datetime import date
-from typing import Optional
-from fastapi import FastAPI, HTTPException, Depends
+from typing import List, Optional
+from fastapi import FastAPI, HTTPException, Depends, Path
+from schemas.user_exercise import ExerciseDataCreate, ExerciseDataResponse, ExerciseDataUpdate
 from routes import auth, user, exercises
 from database import engine
 from models.user import Base, User
@@ -147,94 +148,103 @@ async def read_user_by_username(
 
 # ----- Exercise Endpoints -----
 
-@app.get("/exercise/{user_id}", tags=["Exercise"])
-async def read_user_exercise_data(
+@app.post(
+    "/Exercise/",
+    response_model=ExerciseDataResponse,
+    status_code=201
+)
+async def create_exercise(
     user_id: int,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    payload: ExerciseDataCreate,
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    # Allow access only to admin or to the owner of the exercise data
     if current_user.role != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    data = await user_exercise.get_user_exercise_data(db, user_id)
-    if not data:
-        raise HTTPException(status_code=404, detail="No exercise data found for this user")
-    return data
+        raise HTTPException(403, "Not enough permissions")
+    return await user_exercise.create_user_exercise_data(db, user_id, payload)
 
-@app.put("/exercise/{user_id}", tags=["Exercise"])
-async def update_user_exercise_data(
+@app.put(
+    "/Exercise/{exercise_name}",
+    response_model=ExerciseDataResponse
+)
+async def update_exercise(
     user_id: int,
     exercise_name: str,
-    correct_percentage: float,
-    incorrect_percentage: float,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    payload: ExerciseDataUpdate,
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    # Allow update only if admin or if current user is the owner
     if current_user.role != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    data = await user_exercise.update_user_exercise_data(db, user_id, exercise_name, correct_percentage, incorrect_percentage)
-    if not data:
-        raise HTTPException(status_code=404, detail="No User Found")
-    return data
+        raise HTTPException(403, "Not enough permissions")
+    updated = await user_exercise.update_user_exercise_data(
+        db, user_id, exercise_name, payload
+    )
+    if not updated:
+        raise HTTPException(404, "Exercise record not found")
+    return updated
 
-# Endpoints under '/users/{user_id}/exercise'
-@app.get("/users/{user_id}/exercise", tags=["Exercise"])
-async def read_user_exercise_data_for_user(
-    user_id: int,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    # Allow access only if admin or if current user is the owner
-    if current_user.role != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    data = await user_exercise.get_user_exercise_data(db, user_id)
-    if not data:
-        raise HTTPException(status_code=404, detail="No exercise data found for this user")
-    return data
-
-@app.put("/users/{user_id}/exercise", tags=["Exercise"])
-async def update_user_exercise_data_for_user(
+@app.get(
+    "/Exercise/{exercise_name}",
+    response_model=ExerciseDataResponse
+)
+async def read_by_name(
     user_id: int,
     exercise_name: str,
-    correct_percentage: float,
-    incorrect_percentage: float,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     if current_user.role != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    result = await user_exercise.update_user_exercise_data(db, user_id, exercise_name, correct_percentage, incorrect_percentage)
-    if not result:
-        raise HTTPException(status_code=404, detail="No User Found")
-    return result
+        raise HTTPException(403, "Not enough permissions")
+    record = await user_exercise.get_user_exercise_data_by_name(
+        db, user_id, exercise_name
+    )
+    if not record:
+        raise HTTPException(404, "No exercise data found for this name")
+    return record
 
-@app.get("/users/{user_id}/exercise/{exercise_name}", tags=["Exercise"])
-async def read_user_exercise_data_by_name(
+@app.get(
+    "/Exercise/date/{workout_date}",
+    response_model=List[ExerciseDataResponse]
+)
+async def read_by_date(
+    user_id: int,
+    workout_date: date,
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if current_user.role != "admin" and current_user.id != user_id:
+        raise HTTPException(403, "Not enough permissions")
+    records = await user_exercise.get_user_exercise_data_by_date(
+        db, user_id, workout_date
+    )
+    if not records:
+        raise HTTPException(404, "No entries found on that date")
+    return records
+
+@app.delete(
+        "/Exercise/{exercise_name}",
+        response_model=ExerciseDataResponse,
+)
+async def delete_exercise(
     user_id: int,
     exercise_name: str,
-    workout_date: Optional[date] = None, 
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     if current_user.role != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    data = await user_exercise.get_user_exercise_data_by_name(db, user_id, exercise_name, workout_date)
-    if not data:
-        raise HTTPException(status_code=404, detail="No exercise data found for this user")
-    return data
+        raise HTTPException(403, "Not enough permissions")
 
-@app.get("/users/{user_id}/exercise/{date}")
-async def read_user_exercise_date_by_date(
-    user_id: int,
-    workout_date: Optional[date] = None, 
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    if current_user.role != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    data = await user_exercise.get_user_exercise_data_by_date(db, user_id, workout_date)
-    
+    user = await user_exercise.get_user_data(db, user_id)
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    deleted = await user_exercise.delete_user_exercise_data(
+        db, user_id, exercise_name
+    )
+    if not deleted:
+        raise HTTPException(404, "Exercise record not found")
+    return deleted
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, port=8080)

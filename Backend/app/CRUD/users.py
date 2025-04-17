@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.user import User
-from core.security import hash_password, create_access_token, verify_password
+from core.security import hash_password
 
 async def get_user(db: AsyncSession, user_id: int):
     stmt = select(User).where(User.id == user_id)
