@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import "./home_style.css"
 import ExerciseCard from "../ExerciseCard/ExerciseCard"
