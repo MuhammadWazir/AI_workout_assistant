@@ -17,10 +17,10 @@ class ExerciseDataCreate(ExerciseDataBase):
 
 class ExerciseDataUpdate(BaseModel):
     rep_count: Optional[int]
-    mistake_percentages: Optional[Dict[str, float]]
+    mistake_percentages: Optional[Dict[str, float]] | None = None
     correct_percentage: Optional[float]
     incorrect_percentage: Optional[float]
-    workout_date: Optional[date]
+    workout_date: Optional[date] | None = None
 
 class ExerciseDataResponse(ExerciseDataBase):
     id: int

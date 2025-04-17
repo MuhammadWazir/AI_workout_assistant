@@ -34,6 +34,7 @@ async def get_user_exercise_data_by_name(
     result = await db.execute(stmt)
     record = result.scalars().first()
 
+    print("/n/n/n", record, "/n/n/n")
     if record and not isinstance(record.mistake_percentages, dict):
         print("MISTAKEEEEE: in the mistake_percentages: ", record.mistake_percentages)
         record.mistake_percentages = {}

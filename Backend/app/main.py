@@ -79,9 +79,11 @@ async def create_user(
     username: str,
     email: str,
     password: str,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User= Depends(get_current_user)
 ):
-    # Allow anyone to create a new user (role defaults to "user")
+    if current_user.role != "admin":
+        raise HTTPException(status_code= 403, detail = "Not enough permissions")
     user_obj = await users.create_user(db, username, email, password)
     if user_obj is None:
         raise HTTPException(status_code=400, detail="Email/Username is already registered.")
