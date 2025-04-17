@@ -78,8 +78,7 @@ async def create_user_exercise_data(
         exercise_name=payload.exercise_name,
         rep_count=payload.rep_count,
         mistake_percentages=payload.mistake_percentages,
-        correct_percentage=payload.correct_percentage,
-        incorrect_percentage=payload.incorrect_percentage,
+        score = payload.score,
         total_attempts=1,
         workout_date=payload.workout_date or datetime.utcnow().date()
     )
@@ -105,10 +104,9 @@ async def update_user_exercise_data(
             record.rep_count = payload.rep_count
         if payload.mistake_percentages is not None:
             record.mistake_percentages = payload.mistake_percentages
-        if payload.correct_percentage is not None:
-            record.correct_percentage = payload.correct_percentage
-        if payload.incorrect_percentage is not None:
-            record.incorrect_percentage = payload.incorrect_percentage
+        if payload.score is not None:
+            record.score = payload.score
+        
         record.total_attempts += 1
     else:
         record = UserExerciseData(
@@ -116,8 +114,7 @@ async def update_user_exercise_data(
             exercise_name=exercise_name,
             rep_count=payload.rep_count or 0,
             mistake_percentages=payload.mistake_percentages,
-            correct_percentage=payload.correct_percentage or 0.0,
-            incorrect_percentage=payload.incorrect_percentage or 0.0,
+            score=payload.score or 0.0,
             total_attempts=1,
             workout_date=workout_date
         )

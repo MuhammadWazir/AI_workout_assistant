@@ -15,8 +15,7 @@ class UserExerciseData(Base):
     rep_count = Column(Integer, default=0)  
     mistake_percentages = Column(JSON, nullable=True) 
 
-    correct_percentage = Column(Float, default=0.0)
-    incorrect_percentage = Column(Float, default=0.0)
+    score = Column(Float, default=0.0)
 
     total_attempts = Column(Integer, default=0)
     workout_date = Column(Date, default=lambda: datetime.utcnow().date())

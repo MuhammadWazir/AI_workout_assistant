@@ -48,14 +48,15 @@ def read_root():
 
 # ----- User Endpoints -----
 
-@app.get("/users/{user_id}", tags=["Users"])
+@app.get("/users/", tags=["Users"])
 async def read_user(
-    user_id: int,
+    user_id: int | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # Allow if the current user is admin or is accessing their own data
-    if current_user.role != "admin" and current_user.id != user_id:
+    if current_user.role == "user" and user_id == None:
+        user_id = current_user.id
+    elif current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     user_data = await users.get_user(db, user_id)
     if not user_data:
@@ -69,7 +70,6 @@ async def read_users(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # Only admin can list all users
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return await users.get_users(db, skip, limit)
@@ -89,16 +89,18 @@ async def create_user(
         raise HTTPException(status_code=400, detail="Email/Username is already registered.")
     return user_obj
 
-@app.put("/users/{user_id}", tags=["Users"])
+@app.put("/users/", tags=["Users"])
 async def update_user(
-    user_id: int,
     username: str,
     email: str,
     password: str,
+    user_id: int | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     # Allow update if admin or if updating own account
+    if current_user.role == "user" and user_id == None:
+        user_id = current_user.id
     if current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     user_obj = await users.update_user(db,user_id, username, email, password)
@@ -156,12 +158,14 @@ async def read_user_by_username(
     status_code=201
 )
 async def create_exercise(
-    user_id: int,
     payload: ExerciseDataCreate,
+    user_id: int | None = None,
     current_user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if current_user.role != "admin" and current_user.id != user_id:
+    if current_user.role == "user" and user_id == None:
+        user_id = current_user.id
+    elif current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(403, "Not enough permissions")
     return await user_exercise.create_user_exercise_data(db, user_id, payload)
 
@@ -170,13 +174,15 @@ async def create_exercise(
     response_model=ExerciseDataResponse
 )
 async def update_exercise(
-    user_id: int,
     exercise_name: str,
     payload: ExerciseDataUpdate,
+    user_id: int | None = None,
     current_user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if current_user.role != "admin" and current_user.id != user_id:
+    if current_user.role == "user" and user_id == None:
+        user_id = current_user.id
+    elif current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(403, "Not enough permissions")
     updated = await user_exercise.update_user_exercise_data(
         db, user_id, exercise_name, payload
@@ -190,12 +196,14 @@ async def update_exercise(
     response_model=ExerciseDataResponse
 )
 async def read_by_name(
-    user_id: int,
     exercise_name: str,
+    user_id: int | None = None,
     current_user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if current_user.role != "admin" and current_user.id != user_id:
+    if current_user.role == "user" and user_id == None:
+        user_id = current_user.id
+    elif current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(403, "Not enough permissions")
     record = await user_exercise.get_user_exercise_data_by_name(
         db, user_id, exercise_name
@@ -209,12 +217,14 @@ async def read_by_name(
     response_model=List[ExerciseDataResponse]
 )
 async def read_by_date(
-    user_id: int,
     workout_date: date,
+    user_id: int | None = None,
     current_user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if current_user.role != "admin" and current_user.id != user_id:
+    if current_user.role == "user" and user_id == None:
+        user_id = current_user.id
+    elif current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(403, "Not enough permissions")
     records = await user_exercise.get_user_exercise_data_by_date(
         db, user_id, workout_date
@@ -228,12 +238,14 @@ async def read_by_date(
         response_model=ExerciseDataResponse,
 )
 async def delete_exercise(
-    user_id: int,
     exercise_name: str,
+    user_id: int | None = None,
     current_user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if current_user.role != "admin" and current_user.id != user_id:
+    if current_user.role == "user" and user_id == None:
+        user_id = current_user.id
+    elif current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(403, "Not enough permissions")
 
     user = await user_exercise.get_user_data(db, user_id)
