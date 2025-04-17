@@ -1032,7 +1032,7 @@ function Exercise() {
 
       {!isStarted ? (
         <>
-          <div className="exercise-card">
+          <div className="exercise-card2">
             <h3 className="instruction-title">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
